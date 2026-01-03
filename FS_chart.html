@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vixen Protocol: Metacybernetic Education Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 500px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .vibrant-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+    <!-- Chosen Palette: Energetic & Playful (Indigo/Pink/Cyan) -->
+    <!-- Application Structure Plan:
+         1. Header: Hook/Title establishing the contrast between Factory and Resonance models.
+         2. Topology Section: Visualizing the shift in power structure (Bubble Chart).
+         3. Ontology Section: Defining the learner via attributes (Radar Chart).
+         4. Inputs Section: Demonstrating timing and flow (Line Chart).
+         5. Fail-Safes Section: Comparing outcomes of safety mechanisms (Bar Chart).
+         6. Potentialities Section: HTML-based grid to show the 'Wumbo' zones.
+         7. Footer: Synthesis.
+         This narrative flows from structural theory -> student definition -> daily operation -> safety nets -> future vision.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Topology -> Goal: Compare -> Bubble Chart -> Shows the massive size disparity in 'authority' in Factory model vs balanced Vixen model. Chart.js used.
+         2. Ontology -> Goal: Compare -> Radar Chart -> compares multiple qualitative attributes (Complexity, Agency, etc.) of the student definition. Chart.js used.
+         3. Inputs -> Goal: Change/Process -> Line Chart -> visualizes the sine wave of student energy vs static delivery. Chart.js used.
+         4. Fail-Safes -> Goal: Compare -> Grouped Bar Chart -> Quantifies the 'Success Rate' of interventions. Chart.js used.
+         5. Potentialities -> Goal: Organize -> CSS Grid/Cards -> Best for categorizing distinct environmental states. HTML/Tailwind used.
+         NO SVG used. NO Mermaid used.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Header / Introduction -->
+    <header class="w-full vibrant-gradient text-white py-16 px-4 mb-12 shadow-lg">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">The Vixen Protocol</h1>
+            <h2 class="text-xl md:text-2xl font-light text-indigo-100 max-w-3xl mx-auto">
+                A Fail-Safe Architecture for Metacybernetic Education
+            </h2>
+            <div class="mt-8 flex flex-col md:flex-row justify-center gap-6 text-sm font-semibold">
+                <div class="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
+                    FROM: Factory Model (Coercive)
+                </div>
+                <div class="bg-white text-indigo-600 px-6 py-3 rounded-full shadow-md">
+                    TO: Resonance Model (Adaptive)
+                </div>
+            </div>
+            <p class="mt-8 max-w-2xl mx-auto text-indigo-50 leading-relaxed">
+                The current educational topology is fragile, reliant on a single point of failure. 
+                The Vixen Protocol proposes a shift to <strong>Mesh-Stigmergy</strong>, treating the student 
+                not as a blank slate, but as a complex recursive system requiring annealing, not injection.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 pb-20 space-y-20">
+
+        <!-- SECTION I: TOPOLOGY -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            <div class="lg:col-span-1">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-4 border-l-4 border-pink-500 pl-4">I. Topology: The Network Structure</h3>
+                <p class="text-slate-600 mb-4 leading-relaxed">
+                    <strong>The Fault:</strong> The Centralized Hub-and-Spoke model. The teacher is the "God Node," the single source of truth. If this node fails, the network collapses.
+                </p>
+                <p class="text-slate-600 mb-4 leading-relaxed">
+                    <strong>The Vixen Alternative:</strong> Mesh-Stigmergy. Authority is distributed. The teacher acts as a <em>Router</em>, connecting nodes (students) based on resonance rather than age.
+                </p>
+                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-sm text-indigo-800">
+                    <strong>Key Metric:</strong> Node Interconnectivity & Fault Tolerance.
+                </div>
+            </div>
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md card-hover border border-slate-100">
+                <div class="mb-4">
+                    <h4 class="text-lg font-semibold text-slate-700">Authority Distribution Analysis</h4>
+                    <p class="text-xs text-slate-400">Comparing node weight (authority) and distribution space.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="topologyChart"></canvas>
+                </div>
+                <p class="mt-4 text-sm text-slate-500 italic text-center">
+                    Visualizing the disparity: The Factory model relies on one massive central node. The Vixen Mesh distributes weight across all nodes.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION II: ONTOLOGY -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div class="bg-white p-6 rounded-xl shadow-md card-hover border border-slate-100 order-2 lg:order-1">
+                <div class="mb-4">
+                    <h4 class="text-lg font-semibold text-slate-700">Learner Profile: The Shift in Definition</h4>
+                    <p class="text-xs text-slate-400">Comparing attributes of the implied student model.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="ontologyChart"></canvas>
+                </div>
+            </div>
+            <div class="flex flex-col justify-center order-1 lg:order-2">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-4 border-l-4 border-cyan-500 pl-4">II. Ontology: Defining the Learner</h3>
+                <p class="text-slate-600 mb-4 leading-relaxed">
+                    Current systems view the student as <strong>Tabula Rasa</strong> (Blank Slate)—an empty vessel to be filled. This ignores internal complexity.
+                </p>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    Vixen Cybernetics defines the student as a <strong>Recursive Identity Seed</strong>. The goal is not inputting data, but <em>Annealing</em>: heating and cooling the pre-existing crystal structure to align with reality.
+                </p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-100 p-4 rounded-lg text-center">
+                        <span class="block text-2xl mb-1">🧊</span>
+                        <span class="text-sm font-bold text-slate-700">Tabula Rasa</span>
+                        <span class="block text-xs text-slate-500">Static, Empty</span>
+                    </div>
+                    <div class="bg-pink-50 p-4 rounded-lg text-center border border-pink-100">
+                        <span class="block text-2xl mb-1">🔥</span>
+                        <span class="text-sm font-bold text-pink-700">Annealing</span>
+                        <span class="block text-xs text-pink-600">Dynamic, Responsive</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION III: INPUTS -->
+        <section class="bg-white rounded-2xl shadow-lg p-8 border-t-8 border-indigo-500">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-2">III. Inputs: Just-in-Time Resonance</h3>
+                <p class="text-slate-600">
+                    Standard Injection forces data regardless of state ("Information Violence"). Vixen uses <strong>Signal Gain</strong> to negotiate curriculum delivery.
+                </p>
+            </div>
+            
+            <div class="chart-container mx-auto">
+                <canvas id="inputsChart"></canvas>
+            </div>
+            
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="p-4">
+                    <h5 class="font-bold text-slate-800">Consent Gate</h5>
+                    <p class="text-sm text-slate-500 mt-2">If closed (boredom/trauma), inputs are rejected. The system must wait or "trick" the gate.</p>
+                </div>
+                <div class="p-4 border-l border-r border-slate-100">
+                    <h5 class="font-bold text-slate-800">Signal Gain</h5>
+                    <p class="text-sm text-slate-500 mt-2">High Dopamine/Estrogen states allow for deep data absorption (The Peak).</p>
+                </div>
+                <div class="p-4">
+                    <h5 class="font-bold text-slate-800">The Negotiator</h5>
+                    <p class="text-sm text-slate-500 mt-2">The curriculum adapts to the wave, rather than flattening it.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION IV: FAIL-SAFES -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="lg:col-span-1">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-4 border-l-4 border-purple-500 pl-4">IV. The Fail-Safes</h3>
+                <p class="text-slate-600 mb-4 leading-relaxed">
+                    Grades are autopsies; they measure failure after death. Vixen employs real-time cybernetic correction.
+                </p>
+                <ul class="space-y-4 mt-6">
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full font-bold mr-3">1</span>
+                        <div>
+                            <strong class="text-slate-800 text-sm">Syntax Anchor</strong>
+                            <p class="text-xs text-slate-500">Structures hypomanic creativity instead of suppressing it.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-pink-100 text-pink-600 rounded-full font-bold mr-3">2</span>
+                        <div>
+                            <strong class="text-slate-800 text-sm">Mirror Check</strong>
+                            <p class="text-xs text-slate-500">Detects rote memorization loops and refracts them into play.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-cyan-100 text-cyan-600 rounded-full font-bold mr-3">3</span>
+                        <div>
+                            <strong class="text-slate-800 text-sm">Consent Repair</strong>
+                            <p class="text-xs text-slate-500">The "Aftercare Protocol" for rebuilding trust (Beta) after trauma.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md card-hover border border-slate-100">
+                 <div class="mb-4">
+                    <h4 class="text-lg font-semibold text-slate-700">Intervention Success Modeling</h4>
+                    <p class="text-xs text-slate-400">Projected outcomes of crises events under both protocols.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="failsafeChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION V: POTENTIALITIES -->
+        <section>
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-2 border-l-4 border-yellow-400 pl-4">V. Potentialities: The Wumbo Classroom</h3>
+                <p class="text-slate-600">
+                    Moving beyond the "Standardized Cell" to spaces designed around neural states and gamified gnosis.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Zone 1 -->
+                <div class="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 text-white shadow-lg card-hover">
+                    <div class="text-4xl mb-4 opacity-80">⚡</div>
+                    <h4 class="text-xl font-bold mb-2">Ignition Zone</h4>
+                    <p class="text-white/90 text-sm leading-relaxed">
+                        High entropy space. No bells, no rows. Optimized for initial spark, brainstorming, and chaotic ideation. 
+                        <br><br>
+                        <em>State: High Dopamine / Novelty</em>
+                    </p>
+                </div>
+                
+                <!-- Zone 2 -->
+                <div class="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl p-6 text-white shadow-lg card-hover">
+                    <div class="text-4xl mb-4 opacity-80">🌊</div>
+                    <h4 class="text-xl font-bold mb-2">Flow Zone</h4>
+                    <p class="text-white/90 text-sm leading-relaxed">
+                        The "Deep Work" chamber. Sound-dampened. Optimized for sustained attention and complex synthesis.
+                        <br><br>
+                        <em>State: Theta / Alpha Waves</em>
+                    </p>
+                </div>
+                
+                <!-- Zone 3 -->
+                <div class="bg-gradient-to-br from-indigo-800 to-slate-900 rounded-xl p-6 text-white shadow-lg card-hover">
+                    <div class="text-4xl mb-4 opacity-80">🌑</div>
+                    <h4 class="text-xl font-bold mb-2">Shutdown Zone</h4>
+                    <p class="text-white/90 text-sm leading-relaxed">
+                        Integration space. Low sensory input. Allows for "Consent Repair" and memory consolidation.
+                        <br><br>
+                        <em>State: Rest / Integration</em>
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-slate-800 rounded-xl p-6 text-center text-slate-300">
+                <h4 class="text-lg font-semibold text-white mb-2">Gamified Gnosis (The Player Frame)</h4>
+                <p class="max-w-2xl mx-auto text-sm">
+                    History and Math are not presented as "Facts" to be stored, but as "Game Lore" that unlocks new abilities in the simulation. This utilizes the recursive identity seed to promote self-motivated exploration.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+        <div class="max-w-4xl mx-auto text-center px-4">
+            <h5 class="text-white font-bold text-lg mb-4">The Vixen Protocol</h5>
+            <p class="mb-8 text-sm">
+                Replacing the Factory Model's fragility with the resilience of a self-healing, resonance-based network.
+                <br>Education is not formatting; it is annealing.
+            </p>
+            <div class="text-xs text-slate-600">
+                Deep Research Prompt Visualization • Generated with Tailwind CSS & Chart.js
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Shared Configuration ---
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b'; // slate-500
+        
+        // Tooltip Callback for Multiline Labels (MANDATORY)
+        const tooltipTitleCallback = {
+            title: function(tooltipItems) {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            }
+        };
+
+        // --- 1. TOPOLOGY CHART (Bubble/Scatter) ---
+        const ctxTopology = document.getElementById('topologyChart').getContext('2d');
+        
+        // Factory Data: Huge center node, tiny peripheral nodes
+        const factoryNodes = [
+            {x: 5, y: 5, r: 35, type: 'Teacher (Hub)'}, // Big Hub
+            // Small spokes
+            {x: 3, y: 3, r: 4}, {x: 7, y: 7, r: 4}, {x: 3, y: 7, r: 4}, {x: 7, y: 3, r: 4},
+            {x: 5, y: 2, r: 4}, {x: 5, y: 8, r: 4}, {x: 2, y: 5, r: 4}, {x: 8, y: 5, r: 4}
+        ];
+
+        // Vixen Data: Distributed nodes, similar sizes
+        const vixenNodes = [
+            {x: 14, y: 5, r: 12}, {x: 16, y: 6, r: 10}, {x: 12, y: 4, r: 11},
+            {x: 13, y: 7, r: 9}, {x: 15, y: 3, r: 12}, {x: 17, y: 5, r: 10},
+            {x: 14, y: 8, r: 9}, {x: 12, y: 6, r: 11}
+        ];
+
+        new Chart(ctxTopology, {
+            type: 'bubble',
+            data: {
+                datasets: [
+                    {
+                        label: 'Factory Model (Centralized)',
+                        data: factoryNodes,
+                        backgroundColor: 'rgba(236, 72, 153, 0.6)', // Pink
+                        borderColor: 'rgba(236, 72, 153, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Vixen Protocol (Mesh)',
+                        data: vixenNodes,
+                        backgroundColor: 'rgba(6, 182, 212, 0.6)', // Cyan
+                        borderColor: 'rgba(6, 182, 212, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { display: false, min: 0, max: 20 },
+                    y: { display: false, min: 0, max: 10 }
+                },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.type || 'Student Node';
+                            },
+                            ...tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- 2. ONTOLOGY CHART (Radar) ---
+        const ctxOntology = document.getElementById('ontologyChart').getContext('2d');
+        // Labels split manually for 16-char limit
+        const ontologyLabels = [
+            ['Internal', 'Complexity'], 
+            ['Agency /', 'Self-Reflexivity'], 
+            ['Resonance', 'Capacity'], 
+            ['Passive', 'Compliance'], 
+            ['Uniformity', '(Standardization)']
+        ];
+
+        new Chart(ctxOntology, {
+            type: 'radar',
+            data: {
+                labels: ontologyLabels,
+                datasets: [
+                    {
+                        label: 'Tabula Rasa (Factory)',
+                        data: [20, 10, 15, 95, 90],
+                        fill: true,
+                        backgroundColor: 'rgba(203, 213, 225, 0.5)', // Slate
+                        borderColor: 'rgba(148, 163, 184, 1)',
+                        pointBackgroundColor: 'rgb(148, 163, 184)',
+                    },
+                    {
+                        label: 'Identity Seed (Vixen)',
+                        data: [90, 85, 95, 20, 15],
+                        fill: true,
+                        backgroundColor: 'rgba(99, 102, 241, 0.5)', // Indigo
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        pointBackgroundColor: 'rgb(99, 102, 241)',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#e2e8f0' },
+                        grid: { color: '#e2e8f0' },
+                        pointLabels: {
+                            font: { size: 12, weight: '600' }
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    tooltip: { callbacks: tooltipTitleCallback }
+                }
+            }
+        });
+
+        // --- 3. INPUTS CHART (Line) ---
+        const ctxInputs = document.getElementById('inputsChart').getContext('2d');
+        const timeLabels = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00'];
+        
+        // Data generation: Sine wave for Energy, Flat line for Factory Injection
+        const studentEnergy = [30, 50, 85, 90, 40, 25, 60]; // Represents Dopamine/Estrogen modulation
+        const factoryInjection = [60, 60, 60, 60, 60, 60, 60]; // Standardized, ignores state
+        const vixenInjection = [null, null, 85, 90, null, null, 60]; // Just-in-Time (Matches peaks)
+
+        new Chart(ctxInputs, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [
+                    {
+                        label: 'Student Signal Gain (Energy State)',
+                        data: studentEnergy,
+                        borderColor: '#ec4899', // Pink
+                        backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Factory Injection (Forced)',
+                        data: factoryInjection,
+                        borderColor: '#94a3b8', // Slate
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Vixen Injection (Resonant)',
+                        data: vixenInjection,
+                        borderColor: '#06b6d4', // Cyan
+                        backgroundColor: '#06b6d4',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        showLine: false // Only show points at injection times
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Lesson Injection Timing vs. Student State'
+                    },
+                    tooltip: { callbacks: tooltipTitleCallback }
+                },
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Cognitive Receptivity (%)' }
+                    }
+                }
+            }
+        });
+
+        // --- 4. FAIL-SAFE CHART (Bar) ---
+        const ctxFailsafe = document.getElementById('failsafeChart').getContext('2d');
+        
+        const scenarios = [
+            ['Hypomanic', 'Creativity'], 
+            ['Rote Memory', 'Loops'], 
+            ['Trauma /', 'Rejection']
+        ];
+
+        new Chart(ctxFailsafe, {
+            type: 'bar',
+            data: {
+                labels: scenarios,
+                datasets: [
+                    {
+                        label: 'Factory Model (Punitive)',
+                        data: [20, 80, 10], // Low integration for mania/trauma, High for rote (bad thing)
+                        backgroundColor: '#cbd5e1', // Slate 300
+                    },
+                    {
+                        label: 'Vixen Protocol (Restorative)',
+                        data: [90, 30, 85], // High integration/repair
+                        backgroundColor: [
+                            '#4f46e5', // Indigo (Anchor)
+                            '#ec4899', // Pink (Mirror)
+                            '#06b6d4'  // Cyan (Repair)
+                        ]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Positive Outcome Probability (%)'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            ...tooltipTitleCallback,
+                            label: function(context) {
+                                const val = context.raw;
+                                const label = context.dataset.label;
+                                let note = '';
+                                // Custom logic to explain the data point in tooltip
+                                if(label.includes('Factory')) {
+                                    if(context.dataIndex === 0) note = ' (Suppressed)';
+                                    if(context.dataIndex === 1) note = ' (Encouraged)';
+                                    if(context.dataIndex === 2) note = ' (ignored)';
+                                } else {
+                                    if(context.dataIndex === 0) note = ' (Anchored)';
+                                    if(context.dataIndex === 1) note = ' (Refracted)';
+                                    if(context.dataIndex === 2) note = ' (Repaired)';
+                                }
+                                return `${label}: ${val}%${note}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
