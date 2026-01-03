@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vixen Cybernetics // Deck Builder v3.0</title>
+  <style>
+    :root {
+      /* --- VIXEN NEON PALETTE --- */
+      --bg-void: #0a0a0f;
+      --bg-panel: #121216;
+      --bg-input: #1a1a20;
+      --text-main: #e0e0e0;
+      --text-muted: #888;
+      
+      --accent: #9d4edd;   /* Primary Purple */
+      --success: #00b4d8;  /* Cyber Blue */
+      --danger: #ff4444;   /* Alert Red */
+      --gold: #d4af37;     /* Archetypal Gold */
+      
+      --border: #333;
+      --font-stack: 'Courier New', monospace;
+
+      /* NEON PRESETS */
+      --n1: #ffb3ba; --n2: #ffdfba; --n3: #ffffba; 
+      --n4: #baffc9; --n5: #bae1ff; --n6: #a0c4ff; 
+      --n7: #bdb2ff; --n8: #ffc6ff; --n9: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- 1. NAVIGATION BRIDGE --- */
+    .nav-bar {
+      height: 50px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      background: #050508;
+      justify-content: space-between;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+    .brand { 
+      color: var(--accent); 
+      font-weight: bold; 
+      letter-spacing: 2px; 
+      text-shadow: 0 0 10px rgba(157, 78, 221, 0.4);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-group { display: flex; gap: 10px; align-items: center; }
+    
+    .nav-btn {
+      background: transparent; border: 1px solid transparent; color: #666; 
+      padding: 6px 12px; cursor: pointer; transition: all 0.3s;
+      font-family: var(--font-stack); font-size: 0.8rem;
+      border-radius: 2px;
+    }
+    .nav-btn:hover { color: #fff; border-color: #333; }
+    .nav-btn.active { background: var(--accent); color: #000; font-weight: bold; box-shadow: 0 0 10px rgba(157, 78, 221, 0.4); border-color: var(--accent); }
+    
+    .vault-btn { border: 1px solid var(--gold); color: var(--gold); }
+    .vault-btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 10px var(--gold); }
+
+    /* --- 2. WORKSPACE CONTAINER --- */
+    .workspace { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+    .view-section { 
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+      display: none; background: var(--bg-void);
+    }
+    .view-section.active { display: flex; }
+
+    /* --- ARCHITECT VIEW --- */
+    #view-architect { flex-direction: row; }
+    .settings-panel { width: 25%; padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); background: #0e0e12; }
+    .editor-panel { width: 35%; padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); background: var(--panel-bg); }
+    .preview-panel { width: 40%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
+
+    /* MOBILE SUB-NAV */
+    .mobile-tab-bar { display: none; }
+
+    /* --- GALLERY VIEW --- */
+    .gallery-toolbar { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 15px; background: var(--panel-bg); flex-shrink: 0; }
+    .gallery-grid { flex: 1; padding: 30px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 30px; align-content: start; }
+    .gallery-card-wrapper { position: relative; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; }
+    .gallery-card-wrapper:hover { transform: translateY(-5px); z-index: 10; }
+
+    /* --- TABLE VIEW --- */
+    .table-surface { width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a24 0%, #000 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow-y: auto; }
+    .spread-zone { display: flex; gap: 40px; align-items: center; justify-content: center; min-height: 450px; perspective: 1000px; padding: 20px; }
+    .table-slot { width: 240px; height: 384px; border: 2px dashed #333; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 2rem; position: relative; flex-shrink: 0; }
+    .table-slot::after { content: attr(data-label); position: absolute; bottom: -30px; width: 100%; text-align: center; font-size: 0.8rem; color: #666; letter-spacing: 2px; }
+
+    /* --- CONTROLS --- */
+    h1 { font-size: 0.9rem; color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid var(--accent); padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+    h2 { font-size: 0.7rem; color: #888; margin-top: 20px; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px dashed #333; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 0.7rem; margin-bottom: 4px; color: #aaa; text-transform: uppercase; }
+    input, textarea, select { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: #fff; padding: 8px; font-family: monospace; font-size: 0.8rem; box-sizing: border-box; transition: border 0.2s; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+    input[type="color"] { height: 35px; padding: 0; cursor: pointer; }
+    .row { display: flex; gap: 10px; }
+    .col { flex: 1; }
+    button { background: var(--accent); color: #000; border: none; padding: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: filter 0.2s; }
+    button:hover { filter: brightness(1.2); }
+    button.secondary { background: #333; color: #fff; }
+    button.load-btn { background: var(--success); color: #000; }
+    button.vault-action { width: auto; padding: 5px 10px; font-size: 0.7rem; }
+    button.icon-btn { width: auto; padding: 5px 10px; margin: 0; }
+    button.remove-btn { background: none; color: #555; width: auto; padding: 0; font-size: 12px; }
+    button.remove-btn:hover { color: var(--danger); }
+
+    .deck-navigator { display: flex; gap: 5px; background: #000; border: 1px solid var(--accent); padding: 5px; border-radius: 4px; margin-bottom: 20px; align-items: center; }
+    .deck-navigator select { border: none; background: transparent; color: #fff; flex: 1; }
+    .nav-arrow { width: 30px; background: #222; color: #fff; border: 1px solid #333; }
+    .nav-new { width: 40px; background: var(--success); color: #000; }
+    .nav-del { width: 40px; background: var(--danger); color: #fff; }
+
+    /* --- COLOR PREVIEW --- */
+    .color-preview-box { width: 100%; height: 35px; border: 1px solid #555; border-radius: 4px; cursor: pointer; margin-bottom: 5px; position: relative; overflow: hidden; animation: preview-global-cycle 3s infinite linear; }
+    .color-preview-box::after { content: "EDIT PALETTE"; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: rgba(0,0,0,0.6); font-weight: bold; opacity: 0; transition: opacity 0.2s; }
+    .color-preview-box:hover::after { opacity: 1; }
+    .neon-preview-box { width: 30px; height: 30px; border: 1px solid #555; border-radius: 50%; cursor: pointer; animation: preview-neon-cycle 9s infinite linear; flex-shrink: 0; }
+    .collapsed-inputs { display: none; margin-top: 5px; padding: 5px; background: #000; border: 1px dashed #333; }
+    .collapsed-inputs.show { display: flex; animation: slideDown 0.2s ease-out; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes preview-global-cycle { 0%, 100% { background-color: var(--c1); } 33% { background-color: var(--c2); } 66% { background-color: var(--c3); } }
+    @keyframes preview-neon-cycle { 0% { background-color: var(--n1); } 11.1% { background-color: var(--n2); } 22.2% { background-color: var(--n3); } 33.3% { background-color: var(--n4); } 44.4% { background-color: var(--n5); } 55.5% { background-color: var(--n6); } 66.6% { background-color: var(--n7); } 77.7% { background-color: var(--n8); } 88.8% { background-color: var(--n9); } 100% { background-color: var(--n1); } }
+
+    /* --- CARD RENDER ENGINE --- */
+    .card-frame { width: 240px; height: 384px; background: #08080a; border: 3px solid var(--accent); border-radius: 12px; position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; overflow: hidden; }
+    .card-title, .card-meta, .corner, .emoji-layer { font-family: var(--font-stack); transition: color 0.3s; z-index: 5; }
+    .anim-0 { animation: pulse-pingpong 6s infinite ease-in-out; } .anim-L { animation: pulse-linear 4s infinite linear; } .anim-R { animation: pulse-linear 4s infinite reverse linear; }
+    @keyframes pulse-linear { 0%, 100% { color: var(--n1); text-shadow: 0 0 5px var(--n1); } 12.5% { color: var(--n2); } 25% { color: var(--n3); } 37.5% { color: var(--n4); } 50% { color: var(--n5); text-shadow: 0 0 10px var(--n5); } 62.5% { color: var(--n6); } 75% { color: var(--n7); } 87.5% { color: var(--n8); } }
+    @keyframes pulse-pingpong { 0%, 100% { color: var(--div-base); opacity: 0.8; } 50% { color: var(--div-base); opacity: 1; text-shadow: 0 0 15px var(--div-base); } }
+    .border-pulse { animation: border-pulse 4s infinite; } .border-cycle { animation: border-cycle 6s infinite linear; }
+    @keyframes border-pulse { 0%,100%{ box-shadow: 0 0 10px var(--accent); } 50%{ box-shadow: 0 0 30px var(--accent); } }
+    @keyframes border-cycle { 0%{ border-color: var(--c1); } 33%{ border-color: var(--c2); } 66%{ border-color: var(--c3); } 100%{ border-color: var(--c1); } }
+    .card-frame[data-orient="reversed"] { transform: rotate(180deg); } .card-frame[data-orient="sideways_r"] { transform: rotate(90deg); } .card-frame[data-orient="sideways_l"] { transform: rotate(-90deg); }
+    .corner { position: absolute; font-size: 20px; line-height: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .top-left { top: 10px; left: 10px; } .top-right { top: 10px; right: 10px; } .bottom-left { bottom: 10px; left: 10px; transform: rotate(180deg); } .bottom-right { bottom: 10px; right: 10px; transform: rotate(180deg); }
+    .center-stage { position: relative; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; }
+    .svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.8; fill: var(--div-base); stroke: var(--div-base); }
+    @keyframes spin-ccw { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+    .spin-ccw { animation: spin-ccw 12s linear infinite; transform-origin: center; }
+    .emoji-layer { position: relative; z-index: 2; font-size: 56px; letter-spacing: -6px; }
+    .card-title { position: absolute; bottom: 40px; width: 100%; text-align: center; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .card-meta { position: absolute; bottom: 20px; width: 100%; text-align: center; font-size: 0.65rem; color: #888; }
+
+    /* --- MODALS (Shared) --- */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+    .modal.active { display: flex; }
+    .modal-content { background: #121216; border: 1px solid var(--accent); width: 700px; height: 85vh; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(157, 78, 221, 0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #333; margin-bottom: 10px; }
+    
+    /* VAULT LIST */
+    .vault-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .vault-item { background: #000; border: 1px solid #333; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .vault-item:hover { border-color: var(--gold); }
+    .vault-info { display: flex; flex-direction: column; }
+    .vault-name { font-weight: bold; color: var(--text-main); }
+    .vault-meta { font-size: 0.7rem; color: #666; }
+    .vault-actions { display: flex; gap: 5px; }
+
+    /* EMOJI GRID */
+    .emoji-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; padding-right: 5px; overflow-y: auto; flex: 1; }
+    .grid-item { aspect-ratio: 1; background: #000; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; transition: all 0.1s; color: #fff; font-weight: normal !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", system-ui, sans-serif; }
+    .grid-item:hover { background: var(--accent); transform: scale(1.1); color: #000; }
+
+    /* UI HELPERS */
+    input[type="file"] { display: none; }
+    #toast { position: fixed; bottom: 30px; right: 30px; background: var(--success); color: #000; padding: 12px 24px; font-weight: bold; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; box-shadow: 0 0 20px rgba(0, 180, 216, 0.5); }
+    #toast.show { opacity: 1; }
+
+    /* ================= MOBILE MEDIA QUERIES ================= */
+    @media (max-width: 768px) {
+      body { height: 100%; overflow: auto; position: fixed; width: 100%; }
+      .nav-bar { padding: 0 10px; } .brand { font-size: 0.8rem; } .nav-btn { padding: 4px 10px; font-size: 0.7rem; }
+      .workspace { overflow: hidden; }
+      #view-architect.container { flex-direction: column; height: 100%; }
+      .settings-panel, .editor-panel, .preview-panel { width: 100%; height: calc(100% - 60px); border-right: none; display: none; padding: 15px; }
+      .panel-mobile-active { display: block !important; }
+      .preview-panel { justify-content: flex-start; padding-top: 30px; }
+      .mobile-tab-bar { display: flex; height: 60px; background: #000; border-top: 1px solid var(--accent); justify-content: space-around; align-items: center; width: 100%; z-index: 20; flex-shrink: 0; }
+      .mob-tab { background: transparent; color: #666; border: none; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 33%; height: 100%; justify-content: center; }
+      .mob-tab.active { color: var(--accent); background: #111; border-top: 2px solid var(--accent); }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); padding: 10px; gap: 10px; }
+      .spread-zone { flex-direction: column; padding: 40px 10px; gap: 40px; overflow-y: auto; height: 100%; justify-content: flex-start; }
+      .table-slot { transform: scale(0.9); flex-shrink: 0; }
+      input, textarea, select { font-size: 16px; } 
+      .modal-content { width: 95%; height: 90vh; }
+      .emoji-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="nav-bar">
+  <div class="brand">VIXEN // v3.0</div>
+  <div class="nav-group">
+    <button class="nav-btn vault-btn" onclick="openVault()">💾 VAULT</button>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-btn active" onclick="switchView('architect')">ARCHITECT</button>
+    <button class="nav-btn" onclick="switchView('gallery')">GALLERY</button>
+    <button class="nav-btn" onclick="switchView('table')">TABLE</button>
+  </div>
+</div>
+
+<div class="workspace">
+  
+  <!-- === VIEW 1: ARCHITECT (Editing) === -->
+  <div id="view-architect" class="view-section active container">
+    
+    <!-- 1. SETTINGS PANEL -->
+    <div id="mob-panel-settings" class="settings-panel">
+      <h1>1. Deck Meta</h1>
+      <div class="form-group"><label>Deck Name</label><input type="text" id="deck-name" value="New Vixen Deck" oninput="updateDeckMeta()"></div>
+      <div class="form-group"><label>Author</label><input type="text" id="deck-author" value="Vixen" oninput="updateDeckMeta()"></div>
+      
+      <div class="row">
+        <div class="col"><button class="load-btn" onclick="saveToVault()">SAVE TO VAULT</button></div>
+        <div class="col"><button class="secondary" onclick="exportDeck()">JSON EXPORT</button></div>
+      </div>
+      <div class="row" style="margin-top:5px;">
+        <div class="col"><button class="load-btn" onclick="document.getElementById('file-upload').click()">📂 LOAD JSON</button><input type="file" id="file-upload" accept=".json" onchange="importDeck(this)"></div>
+        <div class="col"><button class="secondary" onclick="resetDeck()">⚠️ NEW DECK</button></div>
+      </div>
+      
+      <h2>Typography</h2>
+      <div class="form-group">
+        <select id="set-font-preset" onchange="updateTypography()">
+          <option value="'Courier New', monospace">Terminal (Default)</option>
+          <option value="Impact, fantasy">Impact</option>
+          <option value="Arial, sans-serif">Clean Sans</option>
+        </select>
+        <button class="secondary" onclick="document.getElementById('font-upload').click()" style="margin-top:5px;">UPLOAD FONT (.ttf)</button>
+        <input type="file" id="font-upload" accept=".ttf,.otf,.woff,.woff2" onchange="loadCustomFont(this)">
+      </div>
+
+      <h2>Divisions</h2>
+      <div id="hierarchy-container"></div>
+      <button class="secondary" onclick="addDivision()">+ ADD DIVISION</button>
+
+      <h2>Card Back</h2>
+      <div class="color-preview-box" onclick="toggleGlobalColorEdit()" title="Click to Edit Global Palette"></div>
+      <div id="global-colors-edit" class="collapsed-inputs row">
+        <div class="col"><input type="color" id="col-1" value="#9d4edd" onchange="updateGlobalSettings()"></div>
+        <div class="col"><input type="color" id="col-2" value="#00b4d8" onchange="updateGlobalSettings()"></div>
+        <div class="col"><input type="color" id="col-3" value="#ff00ff" onchange="updateGlobalSettings()"></div>
+      </div>
+      <div class="form-group" style="margin-top:5px;">
+        <select id="set-anim-mode" onchange="updateGlobalSettings()">
+          <option value="none">Border: Static</option>
+          <option value="pulse">Border: Aura Pulse</option>
+          <option value="cycle">Border: Chroma Cycle</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 2. EDITOR PANEL -->
+    <div id="mob-panel-editor" class="editor-panel panel-mobile-active">
+      <h1>2. Card Input</h1>
+      
+      <div class="deck-navigator">
+        <button class="nav-arrow" onclick="prevCard()">&#9664;</button>
+        <select id="deck-select" onchange="loadCardFromDeck(this.value)"><option value="-1">-- NEW CARD --</option></select>
+        <button class="nav-arrow" onclick="nextCard()">&#9654;</button>
+        <button class="nav-new" onclick="clearEditor()" title="New Card">+</button>
+        <button class="nav-del" onclick="deleteActiveCard()" title="Delete Card">🗑️</button>
+      </div>
+
+      <!-- GLYPH LAB -->
+      <div style="border: 1px solid var(--success); padding: 10px; border-radius: 4px; margin-bottom: 15px; background: #000;">
+        <label style="color:var(--success)">GLYPH LAB</label>
+        <div class="row" style="margin-top:5px;"><input type="text" id="hex-input" placeholder="Paste/Hex"><button onclick="convertHex()">LOAD</button></div>
+        <div id="lab-result" style="font-size:2.5rem; text-align:center; margin:10px 0; min-height:50px;">?</div>
+        <div class="row">
+          <button class="secondary icon-btn" onclick="openGrid()">EMOJI GRID</button>
+          <button class="secondary icon-btn" onclick="injectChar('inp-emoji-c')">CTR</button>
+          <button class="secondary icon-btn" onclick="injectChar('inp-uni-l')">L</button>
+          <button class="secondary icon-btn" onclick="injectChar('inp-uni-tr')">TR</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col form-group"><label>Division</label><select id="inp-division" onchange="onDivisionSelect()"></select></div>
+        <div class="col form-group"><label>Structure</label><select id="inp-structure" onchange="onStructureSelect()"></select></div>
+      </div>
+      <div class="form-group"><label>Card Name</label><input type="text" id="inp-name" placeholder="Name..." oninput="manualUpdate()"></div>
+      <div class="row">
+        <div class="col"><label>Center</label><input type="text" id="inp-emoji-c" oninput="manualUpdate()"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Corner L (Left)</label><input type="text" id="inp-uni-l" oninput="manualUpdate()"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Corner TR</label><input type="text" id="inp-uni-tr" oninput="onTRInput()"></div>
+        <div class="col"><label>Corner BR</label><input type="text" id="inp-uni-br" oninput="manualUpdate()"></div>
+      </div>
+      <div class="form-group"><label>SVG Data</label><textarea id="inp-svg" rows="5" oninput="manualUpdate()" style="font-size:0.7rem;"></textarea></div>
+      <div class="form-group"><label>Keywords</label><input type="text" id="inp-keys"></div>
+      <div class="form-group"><label>Story</label><textarea id="inp-story" rows="2"></textarea></div>
+      
+      <button onclick="saveCard()" style="font-size: 1rem; padding: 15px;">💾 SAVE CARD</button>
+      <div id="output-log" style="text-align:center; margin-top:10px; color:var(--success)">READY</div>
+    </div>
+
+    <!-- 3. PREVIEW PANEL -->
+    <div id="mob-panel-preview" class="preview-panel">
+      <div id="preview-container" class="card-container-3d"></div>
+      <button class="secondary" style="width: auto; margin: 20px 0;" onclick="forceRedraw()">↻ REFRESH PREVIEW</button>
+      <div class="row" style="width:240px">
+        <button class="secondary" onclick="rotatePreview(-1)">↺</button>
+        <button class="secondary" onclick="rotatePreview(1)">↻</button>
+      </div>
+      <div style="color:#555; font-size:0.7rem; margin-top:5px; text-transform:uppercase;">Axis: <span id="axis-label">Upright</span></div>
+    </div>
+
+    <!-- MOBILE TABS -->
+    <div class="mobile-tab-bar">
+      <button class="mob-tab" onclick="switchMobileTab('settings')">⚙️<br>SETTINGS</button>
+      <button class="mob-tab active" onclick="switchMobileTab('editor')">✏️<br>EDITOR</button>
+      <button class="mob-tab" onclick="switchMobileTab('preview')">👁️<br>PREVIEW</button>
+    </div>
+  </div>
+
+  <!-- === VIEW 2: GALLERY === -->
+  <div id="view-gallery" class="view-section" style="flex-direction:column;">
+    <div class="gallery-toolbar">
+      <h2 style="margin:0; border:none; margin-right:10px; color:var(--success); font-size:0.8rem;">GALLERY</h2>
+      <div style="flex:1; display:flex; gap:5px;">
+        <input type="text" id="gallery-search" placeholder="Search..." oninput="renderGallery()" style="width:100%;">
+      </div>
+      <span style="color:#666; font-size:0.7rem; white-space:nowrap;">TOT: <span id="gallery-count" style="color:var(--accent)">0</span></span>
+    </div>
+    <div style="padding:0 20px; background:var(--panel-bg);">
+      <select id="gallery-filter" onchange="renderGallery()" style="width:100%; margin-bottom:5px;"><option value="all">All Divisions</option></select>
+    </div>
+    <div id="gallery-grid" class="gallery-grid"></div>
+  </div>
+
+  <!-- === VIEW 3: TABLE === -->
+  <div id="view-table" class="view-section" style="flex-direction:column;">
+    <div class="gallery-toolbar" style="background:#000;">
+      <h2 style="margin:0; border:none; margin-right:20px; color:var(--gold);">THE VOID TABLE</h2>
+      <button class="secondary" style="width:auto;" onclick="dealSpread()">🎲 DEAL SPREAD</button>
+    </div>
+    <div class="table-surface">
+      <div class="spread-zone" id="spread-zone">
+        <div class="table-slot" data-label="I. THESIS"></div>
+        <div class="table-slot" data-label="II. ANTITHESIS"></div>
+        <div class="table-slot" data-label="III. SYNTHESIS"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODALS -->
+<div id="gridModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin:0; color:var(--success);">EMOJI LIBRARY</h2>
+      <button class="secondary" style="width:auto; margin:0;" onclick="closeGrid()">CLOSE</button>
+    </div>
+    <div id="emoji-grid" class="emoji-grid"></div>
+    <div style="font-size:0.7rem; color:#666; margin-top:10px; text-align:center;">CLICK TO LOAD & COPY</div>
+  </div>
+</div>
+
+<div id="vaultModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin:0; color:var(--gold);">CYBER VAULT STORAGE</h2>
+      <button class="secondary" style="width:auto; margin:0;" onclick="closeVault()">CLOSE</button>
+    </div>
+    <div style="padding:10px; color:#aaa; font-size:0.8rem; border-bottom:1px solid #333;">
+      LOCAL BROWSER STORAGE // PERSISTENT
+    </div>
+    <div id="vault-list" class="vault-list" style="padding-top:10px;">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<div id="toast">Action Complete</div>
+
+<script>
+  /* --- STATE --- */
+  let DECK_CONFIG = { flipMode: "4", colors: ["#9d4edd", "#00b4d8", "#ff00ff"], animMode: "none", fontPreset: "'Courier New', monospace", divisions: [] };
+  let DECK_META = { name: "New Vixen Deck", author: "Vixen", version: "1.0", created: Date.now() };
+  let CARDS = [];
+  let currentRotation = 0; 
+  let activeCardId = null; 
+  const ROTATION_LABELS = ["Upright", "Sideways Right", "Reversed", "Sideways Left"];
+  const NEON_PALETTE = ["#ffb3ba", "#ffdfba", "#ffffba", "#baffc9", "#bae1ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#ffffff"];
+  let labChar = "";
+
+  const DEFAULT_SVG = `<g style="animation: spin-ccw 12s linear infinite; transform-origin: 50px 50px;"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M50 5 L63 40 H98 L70 62 L81 95 L50 75 L19 95 L30 62 L2 40 H37 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></g>`;
+
+  window.onload = function() {
+    if(DECK_CONFIG.divisions.length === 0) addDivision(); 
+    document.getElementById('inp-svg').value = DEFAULT_SVG;
+    renderHierarchyInputs(); updateSelectors(); updateGlobalSettings(); buildEmojiGrid(); updateCardSelector(); manualUpdate();
+  };
+
+  /* --- VAULT SYSTEM (New) --- */
+  function openVault() {
+    renderVaultList();
+    document.getElementById('vaultModal').classList.add('active');
+  }
+  function closeVault() {
+    document.getElementById('vaultModal').classList.remove('active');
+  }
+  
+  function getVault() {
+    const v = localStorage.getItem('vixen_cybernetics_vault');
+    return v ? JSON.parse(v) : [];
+  }
+  
+  function saveToVault() {
+    const vault = getVault();
+    // Update Meta timestamp
+    DECK_META.modified = Date.now();
+    
+    const deckData = {
+      id: DECK_META.id || Date.now().toString(36), // Use existing ID or create new
+      meta: DECK_META,
+      config: DECK_CONFIG,
+      cards: CARDS
+    };
+    
+    // Check if updating existing by ID
+    const idx = vault.findIndex(d => d.id === deckData.id);
+    if(idx > -1) {
+        vault[idx] = deckData;
+        showToast(`Updated "${DECK_META.name}" in Vault`);
+    } else {
+        // Ensure ID is persistent in current session
+        DECK_META.id = deckData.id; 
+        vault.unshift(deckData);
+        showToast(`Saved "${DECK_META.name}" to Vault`);
+    }
+    
+    localStorage.setItem('vixen_cybernetics_vault', JSON.stringify(vault));
+  }
+  
+  function loadFromVault(deckId) {
+    const vault = getVault();
+    const deck = vault.find(d => d.id === deckId);
+    if(!deck) return;
+    
+    if(confirm(`Load "${deck.meta.name}"? Unsaved changes to current deck will be lost.`)) {
+        DECK_META = deck.meta;
+        DECK_CONFIG = deck.config;
+        CARDS = deck.cards;
+        
+        // Refresh UI
+        document.getElementById('deck-name').value = DECK_META.name;
+        document.getElementById('deck-author').value = DECK_META.author;
+        document.getElementById('col-1').value = DECK_CONFIG.colors[0];
+        document.getElementById('col-2').value = DECK_CONFIG.colors[1];
+        document.getElementById('col-3').value = DECK_CONFIG.colors[2];
+        document.getElementById('set-anim-mode').value = DECK_CONFIG.animMode;
+        
+        renderHierarchyInputs();
+        updateSelectors();
+        updateGlobalSettings();
+        updateCardSelector();
+        clearEditor();
+        closeVault();
+        showToast("Deck Loaded");
+    }
+  }
+  
+  function deleteFromVault(deckId) {
+    if(!confirm("Permanently delete this deck from Vault?")) return;
+    const vault = getVault().filter(d => d.id !== deckId);
+    localStorage.setItem('vixen_cybernetics_vault', JSON.stringify(vault));
+    renderVaultList();
+  }
+  
+  function renderVaultList() {
+    const list = document.getElementById('vault-list');
+    const vault = getVault();
+    
+    if(vault.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">VAULT EMPTY</div>';
+        return;
+    }
+    
+    list.innerHTML = vault.map(d => `
+      <div class="vault-item">
+        <div class="vault-info">
+          <div class="vault-name">${d.meta.name}</div>
+          <div class="vault-meta">${d.cards.length} cards • ${new Date(d.meta.modified || d.meta.created).toLocaleDateString()}</div>
+        </div>
+        <div class="vault-actions">
+          <button class="vault-action load-btn" onclick="loadFromVault('${d.id}')">LOAD</button>
+          <button class="vault-action remove-btn" onclick="deleteFromVault('${d.id}')">DEL</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  function updateDeckMeta() {
+    DECK_META.name = document.getElementById('deck-name').value;
+    DECK_META.author = document.getElementById('deck-author').value;
+  }
+
+  /* --- VIEW LOGIC --- */
+  function switchView(view) {
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.getElementById(`view-${view}`).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+    event.target.classList.add('active');
+    if(view === 'gallery') renderGallery();
+  }
+  function switchMobileTab(t) {
+    ['settings','editor','preview'].forEach(x => document.getElementById(`mob-panel-${x}`).classList.remove('panel-mobile-active'));
+    document.getElementById(`mob-panel-${t}`).classList.add('panel-mobile-active');
+    document.querySelectorAll('.mob-tab').forEach(b => b.classList.remove('active'));
+    // rudimentary active state update
+    if(t=='settings') document.querySelector('.mobile-tab-bar button:nth-child(1)').classList.add('active');
+    if(t=='editor') document.querySelector('.mobile-tab-bar button:nth-child(2)').classList.add('active');
+    if(t=='preview') document.querySelector('.mobile-tab-bar button:nth-child(3)').classList.add('active');
+  }
+
+  /* --- COMPACT COLOR LOGIC --- */
+  function toggleGlobalColorEdit() { const el = document.getElementById('global-colors-edit'); el.classList.toggle('show'); }
+  function toggleNeonPickers(idx) { const el = document.getElementById(`neon-pickers-${idx}`); el.classList.toggle('show'); }
+
+  /* --- RENDER HIERARCHY --- */
+  function renderHierarchyInputs() {
+    const container = document.getElementById('hierarchy-container');
+    container.innerHTML = "";
+    DECK_CONFIG.divisions.forEach((div, idx) => {
+      if(!div.colorMode) div.colorMode = "manual"; if(!div.colorHex) div.colorHex = NEON_PALETTE[0]; if(!div.animPattern) div.animPattern = "0";
+      const divBox = document.createElement('div');
+      divBox.className = "division-box";
+      divBox.innerHTML = `
+        <button class="remove-btn" onclick="removeDivision(${idx})" style="float:right">X</button>
+        <div class="row"><div style="flex:3"><input type="text" value="${div.name}" onchange="updateDivName(${idx}, this.value)" placeholder="Name"></div><div style="flex:1"><input type="text" value="${div.unicode}" onchange="updateDivUni(${idx}, this.value)" placeholder="Uni"></div></div>
+        <div class="color-controls">
+          <div class="neon-preview-box" onclick="toggleNeonPickers(${idx})" title="Click to Pick Color"></div>
+          <div style="flex:1; display:flex; align-items:center; gap:5px; margin-left:10px;">
+            <select style="width:60px" onchange="updateDivColorMode(${idx}, this.value)"><option value="manual" ${div.colorMode=='manual'?'selected':''}>Man</option><option value="algo" ${div.colorMode=='algo'?'selected':''}>Algo</option></select>
+            <select style="width:50px" onchange="updateDivAnim(${idx}, this.value)"><option value="0" ${div.animPattern=='0'?'selected':''}>0</option><option value="L" ${div.animPattern=='L'?'selected':''}>L</option><option value="R" ${div.animPattern=='R'?'selected':''}>R</option></select>
+          </div>
+        </div>
+        <div id="neon-pickers-${idx}" class="collapsed-inputs" style="flex-wrap:wrap; gap:2px; justify-content:center;">${NEON_PALETTE.map(c => `<div class="swatch" style="background:${c}; width:20px; height:20px;" onclick="setDivColor(${idx}, '${c}')"></div>`).join('')}</div>
+        <div style="margin-top:5px; border-top:1px solid #333; padding-top:5px;">
+           <div id="structs-${idx}">${div.structures.map((s, sIdx) => `<div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#888;"><span>${s.name}:${s.unicode}</span><span style="cursor:pointer; color:red" onclick="removeStructure(${idx}, ${sIdx})">x</span></div>`).join('')}</div>
+           <div class="row" style="margin-top:5px;"><input type="text" id="new-struct-name-${idx}" placeholder="Rank"><input type="text" id="new-struct-uni-${idx}" placeholder="Uni" style="width:40px;"><button class="secondary icon-btn" onclick="addStructure(${idx})">+</button></div>
+        </div>`;
+      container.appendChild(divBox);
+    });
+  }
+
+  function updateDivName(idx, val) { DECK_CONFIG.divisions[idx].name = val; updateSelectors(); }
+  function updateDivUni(idx, val) { DECK_CONFIG.divisions[idx].unicode = val; }
+  function updateDivColorMode(idx, mode) { DECK_CONFIG.divisions[idx].colorMode = mode; renderHierarchyInputs(); manualUpdate(); }
+  function updateDivAnim(idx, mode) { DECK_CONFIG.divisions[idx].animPattern = mode; manualUpdate(); }
+  function setDivColor(idx, color) { DECK_CONFIG.divisions[idx].colorHex = color; toggleNeonPickers(idx); manualUpdate(); }
+  function addDivision() { DECK_CONFIG.divisions.push({ id: Date.now(), name: "New", unicode: "?", structures: [], colorMode: "manual", colorHex: NEON_PALETTE[0], animPattern: "0" }); renderHierarchyInputs(); updateSelectors(); }
+  function removeDivision(idx) { DECK_CONFIG.divisions.splice(idx, 1); renderHierarchyInputs(); updateSelectors(); }
+  function addStructure(divIdx) { const n = document.getElementById(`new-struct-name-${divIdx}`).value; const u = document.getElementById(`new-struct-uni-${divIdx}`).value; if(n && u) { DECK_CONFIG.divisions[divIdx].structures.push({name:n, unicode:u}); renderHierarchyInputs(); updateSelectors(); } }
+  function removeStructure(divIdx, sIdx) { DECK_CONFIG.divisions[divIdx].structures.splice(sIdx, 1); renderHierarchyInputs(); updateSelectors(); }
+
+  /* --- RENDERERS --- */
+  function updateSelectors() {
+    const s = document.getElementById('inp-division'); s.innerHTML = "";
+    DECK_CONFIG.divisions.forEach((d, i) => { const o = document.createElement('option'); o.value = i; o.text = d.name; s.appendChild(o); });
+    onDivisionSelect();
+  }
+  function onDivisionSelect() {
+    const idx = document.getElementById('inp-division').value; if(!DECK_CONFIG.divisions[idx]) return;
+    const div = DECK_CONFIG.divisions[idx];
+    document.getElementById('inp-uni-l').value = div.unicode;
+    const s = document.getElementById('inp-structure'); s.innerHTML = "";
+    div.structures.forEach(st => { const o = document.createElement('option'); o.value = st.unicode; o.text = st.name; s.appendChild(o); });
+    onStructureSelect();
+  }
+  function onStructureSelect() { 
+    const val = document.getElementById('inp-structure').value; 
+    document.getElementById('inp-uni-tr').value = val;
+    document.getElementById('inp-uni-br').value = val; 
+    manualUpdate(); 
+  }
+  function onTRInput() { const val = document.getElementById('inp-uni-tr').value; document.getElementById('inp-uni-br').value = val; manualUpdate(); }
+
+  function updateGlobalSettings() {
+    DECK_CONFIG.colors = [1,2,3].map(i => document.getElementById(`col-${i}`).value);
+    DECK_CONFIG.animMode = document.getElementById('set-anim-mode').value;
+    const r = document.documentElement.style;
+    r.setProperty('--accent', DECK_CONFIG.colors[0]); r.setProperty('--c1', DECK_CONFIG.colors[0]); r.setProperty('--c2', DECK_CONFIG.colors[1]); r.setProperty('--c3', DECK_CONFIG.colors[2]);
+    manualUpdate();
+  }
+
+  function getCardHTML(cardData, scale = 1, fixedWidth = false) {
+    let divObj = DECK_CONFIG.divisions.find(d => d.name === cardData.division);
+    let color = "#fff"; let animClass = "";
+    if(divObj) {
+      if(divObj.colorMode === 'algo') {
+        let hash = 0; for(let i=0; i<divObj.unicode.length; i++) hash = divObj.unicode.charCodeAt(i) + ((hash<<5)-hash);
+        const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+        color = '#' + "00000".substring(0, 6 - c.length) + c;
+      } else { color = divObj.colorHex; }
+      animClass = `anim-${divObj.animPattern}`;
+    }
+    const styleStr = `--div-base: ${color}; transform: scale(${scale}); transform-origin: top center; ${fixedWidth ? 'position:absolute; top:0; left:0;' : ''}`;
+    const inputSvg = cardData.visuals.svg.trim();
+    let finalSvg = "";
+    if(inputSvg.startsWith('<svg')) { if(!inputSvg.includes('class="svg-layer"')) { finalSvg = inputSvg.replace('<svg', '<svg class="svg-layer"'); } else { finalSvg = inputSvg; } } 
+    else if (inputSvg.startsWith('<')) { finalSvg = `<svg class="svg-layer" viewBox="0 0 100 100">${inputSvg}</svg>`; } 
+    else { finalSvg = `<svg class="svg-layer" viewBox="0 0 100 100"><path d="${inputSvg}" fill="currentColor"/></svg>`; }
+    const txtStyle = scale >= 0.8 ? `color: ${animClass === 'anim-0' ? color : ''}` : `color: ${color}`;
+    const activeClass = scale >= 0.8 ? animClass : ''; 
+    return `
+      <div class="card-frame ${DECK_CONFIG.animMode === 'pulse' ? 'border-pulse' : DECK_CONFIG.animMode === 'cycle' ? 'border-cycle' : ''}" style="${styleStr}">
+        <div class="corner top-left ${activeClass}" style="${txtStyle}">${cardData.visuals.corner_l}</div>
+        <div class="corner top-right ${activeClass}" style="${txtStyle}">${cardData.visuals.corner_tr}</div>
+        <div class="corner bottom-left ${activeClass}" style="${txtStyle}">${cardData.visuals.corner_l}</div>
+        <div class="corner bottom-right ${activeClass}" style="${txtStyle}">${cardData.visuals.corner_br}</div>
+        <div class="center-stage"><div class="emoji-layer ${activeClass}" style="${txtStyle}">${cardData.visuals.center}</div>${finalSvg}</div>
+        <div class="card-title ${activeClass}" style="${txtStyle}">${cardData.name}</div>
+        <div class="card-meta ${activeClass}" style="${txtStyle}">${cardData.division} // ${cardData.structure}</div>
+      </div>`;
+  }
+
+  function manualUpdate() {
+    const cardData = {
+      name: document.getElementById('inp-name').value,
+      division: document.getElementById('inp-division').options[document.getElementById('inp-division').selectedIndex]?.text || "DIV",
+      structure: document.getElementById('inp-structure').options[document.getElementById('inp-structure').selectedIndex]?.text || "STR",
+      visuals: { center: document.getElementById('inp-emoji-c').value, corner_l: document.getElementById('inp-uni-l').value, corner_tr: document.getElementById('inp-uni-tr').value, corner_br: document.getElementById('inp-uni-br').value, svg: document.getElementById('inp-svg').value }
+    };
+    document.getElementById('preview-container').innerHTML = getCardHTML(cardData, 1);
+    const frame = document.querySelector('#preview-container .card-frame');
+    if(frame) {
+        const max = parseInt(DECK_CONFIG.flipMode);
+        if (max === 2 && currentRotation === 2) frame.style.transform = "rotate(180deg)";
+        else if (max === 4) {
+            if(currentRotation === 1) frame.style.transform = "rotate(90deg)";
+            if(currentRotation === 2) frame.style.transform = "rotate(180deg)";
+            if(currentRotation === 3) frame.style.transform = "rotate(-90deg)";
+        }
+    }
+  }
+
+  /* --- DECK NAVIGATION --- */
+  function updateCardSelector() {
+    const sel = document.getElementById('deck-select');
+    sel.innerHTML = '<option value="-1">-- NEW CARD --</option>';
+    CARDS.forEach((c, idx) => { const opt = document.createElement('option'); opt.value = idx; opt.text = `${idx + 1}. ${c.name} [${c.division}]`; sel.appendChild(opt); });
+    if(activeCardId) { const idx = CARDS.findIndex(c => c.id === activeCardId); sel.value = (idx !== -1) ? idx : -1; } else { sel.value = -1; }
+  }
+  function loadCardFromDeck(idx) {
+    if(idx == -1) { clearEditor(); return; }
+    const c = CARDS[idx]; activeCardId = c.id;
+    document.getElementById('inp-name').value = c.name;
+    document.getElementById('inp-emoji-c').value = c.visuals.center;
+    document.getElementById('inp-uni-l').value = c.visuals.corner_l;
+    document.getElementById('inp-uni-tr').value = c.visuals.corner_tr || c.visuals.corner_r;
+    document.getElementById('inp-uni-br').value = c.visuals.corner_br || c.visuals.corner_r;
+    document.getElementById('inp-svg').value = c.visuals.svg;
+    document.getElementById('inp-keys').value = c.lore.keys;
+    document.getElementById('inp-story').value = c.lore.story;
+    const divSel = document.getElementById('inp-division');
+    for(let i=0; i<divSel.options.length; i++) { if(divSel.options[i].text === c.division) { divSel.selectedIndex = i; break; } }
+    onDivisionSelect(); 
+    const structSel = document.getElementById('inp-structure');
+    for(let i=0; i<structSel.options.length; i++) { if(structSel.options[i].text === c.structure) { structSel.selectedIndex = i; break; } }
+    manualUpdate(); document.getElementById('output-log').innerText = `EDITING: ${c.name}`;
+  }
+  function prevCard() { const sel = document.getElementById('deck-select'); let idx = parseInt(sel.value); if (idx <= 0) idx = CARDS.length - 1; else idx--; if(CARDS.length > 0) { sel.value = idx; loadCardFromDeck(idx); } }
+  function nextCard() { const sel = document.getElementById('deck-select'); let idx = parseInt(sel.value); if (idx >= CARDS.length - 1) idx = 0; else idx++; if(CARDS.length > 0) { sel.value = idx; loadCardFromDeck(idx); } }
+  function deleteActiveCard() {
+    if(!activeCardId || !confirm("Delete card?")) return;
+    const idx = CARDS.findIndex(c => c.id === activeCardId);
+    if(idx > -1) { CARDS.splice(idx, 1); showToast("Card Deleted"); clearEditor(); updateCardSelector(); if(document.getElementById('view-gallery').classList.contains('active')) renderGallery(); }
+  }
+
+  /* --- GALLERY & TABLE --- */
+  function renderGallery() {
+    const grid = document.getElementById('gallery-grid');
+    const search = document.getElementById('gallery-search').value.toLowerCase();
+    const filter = document.getElementById('gallery-filter').value;
+    grid.innerHTML = "";
+    const filterSel = document.getElementById('gallery-filter');
+    if(filterSel.options.length === 1) { DECK_CONFIG.divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d.name; opt.text = d.name; filterSel.appendChild(opt); }); }
+    let count = 0;
+    CARDS.forEach((card) => {
+      if(!card.visuals.corner_tr) card.visuals.corner_tr = card.visuals.corner_r; if(!card.visuals.corner_br) card.visuals.corner_br = card.visuals.corner_r;
+      if(card.name.toLowerCase().includes(search) || card.division.toLowerCase().includes(search) || card.lore.keys.toLowerCase().includes(search)) {
+        if(filter === 'all' || card.division === filter) {
+          const item = document.createElement('div'); item.className = 'gallery-card-wrapper';
+          item.innerHTML = getCardHTML(card, 0.7); item.style.width = '170px'; item.style.height = '270px';
+          item.onclick = () => editCard(card.id); grid.appendChild(item); count++;
+        }
+      }
+    });
+    document.getElementById('gallery-count').innerText = count;
+  }
+  function dealSpread() {
+    if(CARDS.length < 3) return alert("Need at least 3 cards.");
+    const zone = document.getElementById('spread-zone'); zone.innerHTML = "";
+    const shuffled = [...CARDS].sort(() => 0.5 - Math.random());
+    const spread = shuffled.slice(0, 3);
+    const labels = ["I. THESIS", "II. ANTITHESIS", "III. SYNTHESIS"];
+    spread.forEach((card, i) => {
+      if(!card.visuals.corner_tr) card.visuals.corner_tr = card.visuals.corner_r; if(!card.visuals.corner_br) card.visuals.corner_br = card.visuals.corner_r;
+      const slot = document.createElement('div'); slot.className = 'table-slot'; slot.setAttribute('data-label', labels[i]);
+      slot.innerHTML = getCardHTML(card, 1, true); 
+      if(Math.random() > 0.5) slot.querySelector('.card-frame').style.transform = "rotate(180deg) scale(1)";
+      zone.appendChild(slot);
+    });
+  }
+  function editCard(id) {
+    const card = CARDS.find(c => c.id === id); if(!card) return;
+    const idx = CARDS.findIndex(c => c.id === id); document.getElementById('deck-select').value = idx;
+    loadCardFromDeck(idx); switchView('architect'); if(window.innerWidth <= 768) switchMobileTab('editor');
+  }
+  function clearEditor() { activeCardId = null; document.getElementById('inp-name').value = ""; document.getElementById('inp-emoji-c').value = ""; document.getElementById('inp-keys').value = ""; document.getElementById('inp-story').value = ""; document.getElementById('inp-svg').value = DEFAULT_SVG; document.getElementById('deck-select').value = -1; manualUpdate(); document.getElementById('output-log').innerText = "NEW CARD"; }
+  function saveCard() {
+    let idx = -1; if(activeCardId) idx = CARDS.findIndex(c => c.id === activeCardId); if(idx === -1 && CARDS.length >= 100) return alert("Full");
+    const divSel = document.getElementById('inp-division'); const structSel = document.getElementById('inp-structure');
+    const newCard = { id: activeCardId || Date.now().toString(36), name: document.getElementById('inp-name').value, division: divSel.options[divSel.selectedIndex]?.text, structure: structSel.options[structSel.selectedIndex]?.text, visuals: { center: document.getElementById('inp-emoji-c').value, corner_l: document.getElementById('inp-uni-l').value, corner_tr: document.getElementById('inp-uni-tr').value, corner_br: document.getElementById('inp-uni-br').value, svg: document.getElementById('inp-svg').value }, lore: { keys: document.getElementById('inp-keys').value, story: document.getElementById('inp-story').value } };
+    if(idx > -1) { CARDS[idx] = newCard; showToast(`Updated ${newCard.name}`); } else { CARDS.push(newCard); showToast(`Saved ${newCard.name}`); activeCardId = newCard.id; }
+    updateCardSelector(); document.getElementById('output-log').innerText = `SAVED: ${newCard.name}`;
+  }
+
+  /* --- EMOJI GRID --- */
+  const EMOJI_LIB = { "Cyber": ["💻", "💾", "🤖", "👾", "📡", "🔋", "🧬", "💿", "🕹️", "📱", "🔑", "⚙️", "🔗", "🔌", "⚛️", "👁️‍🗨️"], "Cosmic": ["✨", "🔮", "🕯️", "🌌", "🌑", "🌕", "🌀", "🧿", "🪬", "🗝️", "🚪", "🔥", "⚡", "🌈", "🪐", "☄️", "🛸"], "Nature": ["🐺", "🦊", "🦋", "🐍", "🦢", "🦉", "🐦‍⬛", "🐿️", "🐉", "🕷️", "🕸️", "🌲", "🍄", "🥀", "🌵", "🐾", "🦴"], "Abstract": ["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "⬛", "⬜", "🔶", "🔷", "🔺", "🔻", "💠", "🛑", "⭕", "❌", "❓", "❗", "⚜️", "🔱"], "Numbers": ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "#️⃣", "*️⃣", "♾️"] };
+  function buildEmojiGrid() { const grid = document.getElementById('emoji-grid'); grid.innerHTML = ""; for(const [cat, emojis] of Object.entries(EMOJI_LIB)) { const h = document.createElement('div'); h.className='grid-category'; h.innerText=cat; grid.appendChild(h); const c = document.createElement('div'); c.style.display='grid'; c.style.gridTemplateColumns='repeat(9, 1fr)'; c.style.gap='5px'; emojis.forEach(char => { const d = document.createElement('div'); d.className='grid-item'; d.innerText=char; d.onclick = () => { labChar=char; document.getElementById('hex-input').value=char; document.getElementById('lab-result').innerText=char; closeGrid(); }; c.appendChild(d); }); grid.appendChild(c); } }
+  function openGrid() { document.getElementById('gridModal').classList.add('active'); }
+  function closeGrid() { document.getElementById('gridModal').classList.remove('active'); }
+  function injectChar(id) { if(id === 'inp-uni-tr') { if(labChar) { document.getElementById('inp-uni-tr').value = labChar; document.getElementById('inp-uni-br').value = labChar; manualUpdate(); } } else { if(labChar) { document.getElementById(id).value = labChar; manualUpdate(); } } }
+  function convertHex() { const v = document.getElementById('hex-input').value; if(v) { labChar=v; document.getElementById('lab-result').innerText=v; } }
+
+  /* --- UTILS --- */
+  function forceRedraw() { const c = document.getElementById('preview-container'); const h = c.innerHTML; c.innerHTML=""; setTimeout(()=> {c.innerHTML=h; manualUpdate();}, 50); }
+  function rotatePreview(d) { currentRotation = (currentRotation + d + 4) % 4; manualUpdate(); document.getElementById('axis-label').innerText = ROTATION_LABELS[currentRotation]; }
+  function updateTypography() { DECK_CONFIG.fontPreset = document.getElementById('set-font-preset').value; document.documentElement.style.setProperty('--font-stack', DECK_CONFIG.fontPreset); }
+  function loadCustomFont(input) { const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { const f = new FontFace("CustomFont", e.target.result); f.load().then(lf => { document.fonts.add(lf); document.documentElement.style.setProperty('--font-stack', "CustomFont"); }); }; reader.readAsArrayBuffer(file); }
+  function exportDeck() { const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ meta: DECK_META, config: DECK_CONFIG, cards: CARDS }, null, 2)); const dl = document.createElement('a'); dl.setAttribute("href", data); dl.setAttribute("download", `vixen_deck_${DECK_META.name.replace(/\s+/g,'_')}.json`); document.body.appendChild(dl); dl.click(); dl.remove(); }
+  function importDeck(input) { const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const d = JSON.parse(e.target.result); if(d.meta) { DECK_META = d.meta; document.getElementById('deck-name').value = DECK_META.name; document.getElementById('deck-author').value = DECK_META.author; } if(d.config) { DECK_CONFIG = d.config; document.getElementById('col-1').value=DECK_CONFIG.colors[0]; document.getElementById('col-2').value=DECK_CONFIG.colors[1]; document.getElementById('col-3').value=DECK_CONFIG.colors[2]; document.getElementById('set-anim-mode').value=DECK_CONFIG.animMode; } if(d.cards) CARDS = d.cards; renderHierarchyInputs(); updateSelectors(); updateGlobalSettings(); manualUpdate(); updateCardSelector(); } catch(e) { alert(e); } }; reader.readAsText(file); }
+  function resetDeck() { if(confirm("Reset?")) { CARDS=[]; DECK_CONFIG.divisions=[]; addDivision(); renderHierarchyInputs(); updateSelectors(); updateCardSelector(); manualUpdate(); } }
+</script>
+</body>
+</html>
