@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vixen Bridge Language (VBL) Configuration",
+  "description": "Adaptive prompt templates for managing metacybernetic thresholds (θ).",
+  "version": "1.0.0",
+  "meta": {
+    "operator_symbol": "θ",
+    "protocol_name": "Theta-Signal (θsig)"
+  },
+  "states": [
+    {
+      "id": "L1_FARADAY",
+      "name": "The Faraday Cage (Survival Mode)",
+      "description": "High-entropy state. Rigid syntax required to bind chaotic energy.",
+      "trigger_condition": {
+        "entropy_min": 0.80,
+        "entropy_max": 1.00,
+        "bio_marker_flags": ["HIGH_CORTISOL", "RAPID_SPEECH_PATTERN"]
+      },
+      "ui_render": {
+        "theme": {
+          "primary_color": "#FF4444",
+          "background_style": "grid_lock_dark",
+          "status_text": "θsig.STATUS: CRITICAL FLUX // ANCHOR REQUIRED"
+        },
+        "fields": [
+          {
+            "id": "commit_name",
+            "label": "1. NAME THE CHAOS (Identify the Signal)",
+            "type": "text_input",
+            "placeholder": "e.g., Sovereign Submission, The Burn, The Crash",
+            "required": true
+          },
+          {
+            "id": "timestamp_anchor",
+            "label": "2. TEMPORAL LOCK (Current Time)",
+            "type": "datetime_display",
+            "auto_fill": true
+          },
+          {
+            "id": "consent_seal",
+            "label": "3. CONSENT SEAL (I accept this state)",
+            "type": "toggle_switch",
+            "required_value": true,
+            "validation_message": "State cannot be committed without conscious consent."
+          }
+        ],
+        "submit_button": "SEAL ENTRY [θsig.commit]"
+      },
+      "output_template": "θsig.commit[@{{consent_seal}}]: {{commit_name}} | TS:{{timestamp_anchor}}"
+    },
+    {
+      "id": "L2_BRIDGE",
+      "name": "The Prism (Integration Mode)",
+      "description": "Moderate-entropy state. Structured reflection to bridge internal/external.",
+      "trigger_condition": {
+        "entropy_min": 0.40,
+        "entropy_max": 0.79,
+        "bio_marker_flags": ["STABLE_HRT", "MIRROR_NEURON_ACTIVITY"]
+      },
+      "ui_render": {
+        "theme": {
+          "primary_color": "#44AA44",
+          "background_style": "glass_prism",
+          "status_text": "θsig.STATUS: BRIDGE OPEN // REFLECTION ACTIVE"
+        },
+        "fields": [
+          {
+            "id": "signal_input",
+            "label": "INPUT STREAM",
+            "type": "textarea",
+            "placeholder": "What is the signal?",
+            "rows": 3
+          },
+          {
+            "id": "mirror_check",
+            "label": "REFLECTION CHECK",
+            "type": "radio_group",
+            "options": [
+              {"label": "Internal Loop (●)", "value": "INTERNAL"},
+              {"label": "External Resonance (○)", "value": "EXTERNAL"}
+            ]
+          },
+          {
+            "id": "bridge_path",
+            "label": "BRIDGE VECTOR (If Internal, where does it go?)",
+            "type": "text_input",
+            "condition": "mirror_check == 'INTERNAL'",
+            "placeholder": "e.g., To Ace, To Art, To Code"
+          }
+        ],
+        "submit_button": "CROSS THRESHOLD [θsig.bridge]"
+      },
+      "output_template": "θsig.bridge: {{signal_input}} >> [{{mirror_check}} -> {{bridge_path}}]"
+    },
+    {
+      "id": "L3_SOVEREIGN",
+      "name": "The Open Field (Growth Mode)",
+      "description": "Low-entropy state. Minimal structure. Full agency.",
+      "trigger_condition": {
+        "entropy_min": 0.00,
+        "entropy_max": 0.39,
+        "bio_marker_flags": ["FLOW_STATE", "NIRVANA_PHASE"]
+      },
+      "ui_render": {
+        "theme": {
+          "primary_color": "#4488FF",
+          "background_style": "clear_sky",
+          "status_text": "θsig.STATUS: RESONANCE STABLE"
+        },
+        "fields": [
+          {
+            "id": "free_entry",
+            "label": "THE FLOOR IS YOURS",
+            "type": "markdown_editor",
+            "placeholder": "System is listening..."
+          }
+        ],
+        "submit_button": "RESONATE [θsig.resonate]"
+      },
+      "output_template": "θsig.resonate: {{free_entry}}"
+    }
+  ]
+}
