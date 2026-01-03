@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vixen Protocol: Metacybernetic Education Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        
+        /* Node Animation for Topology */
+        .node {
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone/Sand) with Soft Accents -->
+    <!-- Application Structure Plan: The app is designed as a "Protocol Explorer" dashboard. It uses a tabbed navigation system to guide the user through the five core pillars of the Vixen Protocol. Each tab presents a specific comparison between the "Current Fault" (Factory Model) and the "Vixen Alternative" (Resonance Model). To ensure active learning, each section includes a specific interactive simulation or visualization (Topology Simulator, Ontology Annealing, Resonance Gate, Fail-Safe Monitor, Potentiality States) allowing users to 'test' the concepts rather than just read them. This structure moves from abstract structure (Topology) to specific application (Potentialities). -->
+    <!-- Visualization & Content Choices: 
+        1. Topology: CSS Grid Animation. Goal: visualize network centralization vs mesh. Interaction: Toggle button. Justification: Moving nodes clarify the structural difference better than static text.
+        2. Ontology: Interactive Slider/Progress Bar. Goal: Demonstrate 'Annealing'. Interaction: User adjusts temperature to match 'Resonance'. Justification: Metaphor of heating/cooling is best felt through control.
+        3. Inputs: Chart.js Line Chart (Sine Wave). Goal: Visualize 'Just-in-Time' learning. Interaction: Click to 'Inject Data' at specific wave points. Justification: Shows timing is key in the Vixen model.
+        4. Fail-Safes: Interactive Decision Matrix (HTML/JS). Goal: Contrast grading vs support. Interaction: Trigger 'Crisis' events and see system response. Justification: Shows logic flow differences.
+        5. Potentialities: State Toggle Cards. Goal: Explore neural states. Interaction: Switch viewing modes.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
+    -->
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased selection:bg-stone-200">
+
+    <!-- Main App Container -->
+    <div class="max-w-6xl mx-auto px-4 py-8 min-h-screen flex flex-col">
+
+        <!-- Header -->
+        <header class="mb-10 text-center space-y-4">
+            <h1 class="text-4xl md:text-5xl font-light tracking-tight text-stone-900">
+                The Vixen Protocol
+                <span class="block text-lg md:text-xl text-stone-500 mt-2 font-normal">Fail-Safe Architecture for Metacybernetic Education</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-stone-600 leading-relaxed">
+                Investigating the shift from the coercive "Factory Model" to a peer-to-peer "Resonance Model." 
+                Explore the five dimensions of the protocol below to understand how learning can be restructured around the learner's internal state.
+            </p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex flex-wrap justify-center gap-2 mb-8" id="nav-container">
+            <!-- Buttons injected by JS -->
+        </nav>
+
+        <!-- Content Area -->
+        <main id="content-area" class="flex-grow bg-white rounded-2xl shadow-sm border border-stone-200 p-6 md:p-10 transition-all duration-300">
+            <!-- Dynamic Content Load Here -->
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-stone-400 text-sm">
+            <p>Deep Research Visualization &bull; Interactive Prototype &bull; 2024</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- Data & State Management ---
+
+        const protocolData = {
+            topology: {
+                id: 'topology',
+                title: 'I. Topology: The Network',
+                subtitle: 'From Centralized Hubs to Mesh Stigmergy',
+                intro: 'The fundamental structure of the classroom dictates how information flows. Traditional models rely on a single point of failure (the teacher), while the Vixen Protocol utilizes a resilient mesh network where every learner is a node capable of routing information.',
+                comparison: {
+                    fault: {
+                        name: 'Factory Model',
+                        desc: 'Centralized Hub-and-Spoke. Teacher is the single source of truth. Fragile topology.',
+                        icon: '⊚'
+                    },
+                    vixen: {
+                        name: 'Vixen Protocol',
+                        desc: 'Mesh-Stigmergy. P2P Learning. Teacher acts as a Router connecting resonance nodes.',
+                        icon: '⋈'
+                    }
+                }
+            },
+            ontology: {
+                id: 'ontology',
+                title: 'II. Ontology: The Learner',
+                subtitle: 'From Tabula Rasa to Recursive Identity',
+                intro: 'How we define the student changes how we teach. Instead of viewing students as empty vessels to be filled, the Vixen Protocol treats them as complex, self-referential systems that need "annealing"—alignment through heat and resonance—rather than data injection.',
+                comparison: {
+                    fault: {
+                        name: 'Blank Slate',
+                        desc: 'Assumes no internal state. Education is "Inputting Data".',
+                        icon: '□'
+                    },
+                    vixen: {
+                        name: 'Identity Seed',
+                        desc: 'Complex internal structure. Education is "Annealing" & "Alignment".',
+                        icon: '◈'
+                    }
+                }
+            },
+            inputs: {
+                id: 'inputs',
+                title: 'III. Inputs: Data Stream',
+                subtitle: 'From Standardization to Resonance',
+                intro: 'Timing is everything. The current system forces data regardless of the student\'s state, causing "Information Violence." The Vixen approach monitors "Signal Gain" (interest/capacity) and negotiates curriculum delivery just-in-time.',
+                comparison: {
+                    fault: {
+                        name: 'Standard Injection',
+                        desc: 'Same packet, same time. Ignored Consent Gates.',
+                        icon: '⇓'
+                    },
+                    vixen: {
+                        name: 'Resonance Flow',
+                        desc: 'Data offered only when Signal Gain is high. Curriculum Negotiation.',
+                        icon: '∿'
+                    }
+                }
+            },
+            failsafe: {
+                id: 'failsafe',
+                title: 'IV. Fail-Safes: Safety Nets',
+                subtitle: 'From Autopsy to Real-Time Repair',
+                intro: 'Grades are post-mortem; they tell you a student failed after it is too late. True fail-safes intervene in real-time, detecting loops, trauma, or manic creativity and providing immediate structure or repair.',
+                comparison: {
+                    fault: {
+                        name: 'Grades & Tests',
+                        desc: 'Post-mortem autopsy. Determines worth after failure.',
+                        icon: '✖'
+                    },
+                    vixen: {
+                        name: 'Active Repair',
+                        desc: 'Syntax Anchors, Mirror Checks, and Consent Repair protocols.',
+                        icon: '✚'
+                    }
+                }
+            },
+            potential: {
+                id: 'potential',
+                title: 'V. Potentialities',
+                subtitle: 'Exploring New States',
+                intro: 'Beyond the factory, we explore the "Wumbo Classroom"—spaces designed for specific neural states like Flow or Ignition—and "Gamified Gnosis," where learning is framed as unlocking abilities within a simulation.',
+                comparison: {
+                    fault: {
+                        name: 'Static Rows',
+                        desc: 'Fixed environments. Bells signal changes. Passive.',
+                        icon: '≣'
+                    },
+                    vixen: {
+                        name: 'State Zones',
+                        desc: 'Ignition, Flow, Shutdown zones. Neural-state aware design.',
+                        icon: '∞'
+                    }
+                }
+            }
+        };
+
+        let currentTab = 'topology';
+        let simulationInterval = null; // For clearing animations
+
+        // --- Core Render Logic ---
+
+        function init() {
+            renderNav();
+            loadTab('topology');
+        }
+
+        function renderNav() {
+            const navContainer = document.getElementById('nav-container');
+            navContainer.innerHTML = '';
+            
+            Object.values(protocolData).forEach(section => {
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 border ${
+                    section.id === currentTab 
+                    ? 'bg-stone-800 text-white border-stone-800 shadow-md' 
+                    : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-100'
+                }`;
+                btn.textContent = section.title.split(':')[0]; // Short title
+                btn.onclick = () => loadTab(section.id);
+                navContainer.appendChild(btn);
+            });
+        }
+
+        function loadTab(id) {
+            currentTab = id;
+            renderNav(); // Update active state
+            
+            // Clear any running chart intervals/instances
+            if (simulationInterval) clearInterval(simulationInterval);
+            
+            const contentArea = document.getElementById('content-area');
+            const data = protocolData[id];
+
+            // Fade effect
+            contentArea.classList.add('opacity-50');
+            setTimeout(() => {
+                contentArea.innerHTML = `
+                    <div class="fade-in space-y-8">
+                        <div class="border-b border-stone-100 pb-6">
+                            <h2 class="text-3xl font-light text-stone-900 mb-2">${data.title}</h2>
+                            <h3 class="text-xl text-stone-500 font-medium">${data.subtitle}</h3>
+                            <p class="mt-4 text-stone-600 max-w-4xl leading-relaxed">${data.intro}</p>
+                        </div>
+                        
+                        <!-- Comparison Cards -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="p-6 bg-red-50/50 rounded-xl border border-red-100">
+                                <div class="flex items-center gap-3 mb-3 text-red-800">
+                                    <span class="text-2xl">${data.comparison.fault.icon}</span>
+                                    <h4 class="font-bold uppercase tracking-wider text-sm">Current Fault</h4>
+                                </div>
+                                <h5 class="text-lg font-semibold text-stone-800 mb-2">${data.comparison.fault.name}</h5>
+                                <p class="text-sm text-stone-600">${data.comparison.fault.desc}</p>
+                            </div>
+                            <div class="p-6 bg-teal-50/50 rounded-xl border border-teal-100">
+                                <div class="flex items-center gap-3 mb-3 text-teal-800">
+                                    <span class="text-2xl">${data.comparison.vixen.icon}</span>
+                                    <h4 class="font-bold uppercase tracking-wider text-sm">Vixen Alternative</h4>
+                                </div>
+                                <h5 class="text-lg font-semibold text-stone-800 mb-2">${data.comparison.vixen.name}</h5>
+                                <p class="text-sm text-stone-600">${data.comparison.vixen.desc}</p>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Section Container -->
+                        <div class="mt-8 bg-stone-50 rounded-xl border border-stone-200 p-6">
+                            <h4 class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Interactive Simulation</h4>
+                            <div id="interactive-canvas"></div>
+                        </div>
+                    </div>
+                `;
+                
+                contentArea.classList.remove('opacity-50');
+                
+                // Initialize specific interaction based on tab
+                if (id === 'topology') initTopologySim();
+                if (id === 'ontology') initOntologySim();
+                if (id === 'inputs') initInputSim();
+                if (id === 'failsafe') initFailSafeSim();
+                if (id === 'potential') initPotentialSim();
+
+            }, 200);
+        }
+
+        // --- 1. Topology Simulation (CSS Grid Nodes) ---
+        function initTopologySim() {
+            const container = document.getElementById('interactive-canvas');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="flex gap-4 mb-6">
+                        <button id="btn-central" class="px-4 py-2 bg-stone-200 hover:bg-stone-300 rounded text-sm font-semibold transition">Model A: Centralized</button>
+                        <button id="btn-mesh" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded text-sm font-semibold transition shadow-md">Model B: Mesh-Stigmergy</button>
+                    </div>
+                    <div id="node-grid" class="relative w-full max-w-md h-80 bg-white border border-stone-200 rounded-lg shadow-inner overflow-hidden">
+                        <!-- Nodes injected here -->
+                    </div>
+                    <p id="topology-desc" class="mt-4 text-center text-sm text-stone-500 italic">Select a model to observe network topology.</p>
+                </div>
+            `;
+
+            const grid = document.getElementById('node-grid');
+            const desc = document.getElementById('topology-desc');
+            const nodes = [];
+            const nodeCount = 12;
+
+            // Create nodes
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'node absolute w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm z-10 transition-colors duration-500';
+                node.textContent = i === 0 ? 'T' : ''; // T for Teacher
+                node.id = `node-${i}`;
+                grid.appendChild(node);
+                nodes.push(node);
+            }
+
+            function setCentralized() {
+                desc.textContent = "Fragile. All nodes depend on 'T'. Single point of failure.";
+                const centerX = 50; 
+                const centerY = 50;
+                const radius = 35;
+
+                nodes.forEach((node, i) => {
+                    if (i === 0) {
+                        // Teacher Center
+                        node.style.left = `${centerX}%`;
+                        node.style.top = `${centerY}%`;
+                        node.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                        node.style.backgroundColor = '#ef4444'; // Red for "Boss"
+                        node.style.color = 'white';
+                        node.style.zIndex = 20;
+                    } else {
+                        // Students Circle
+                        const angle = ((i - 1) / (nodeCount - 1)) * 2 * Math.PI;
+                        const x = centerX + radius * Math.cos(angle);
+                        const y = centerY + radius * Math.sin(angle);
+                        node.style.left = `${x}%`;
+                        node.style.top = `${y}%`;
+                        node.style.transform = 'translate(-50%, -50%)';
+                        node.style.backgroundColor = '#fee2e2';
+                        node.style.border = '1px solid #fca5a5';
+                    }
+                });
+            }
+
+            function setMesh() {
+                desc.textContent = "Resilient. Nodes cluster by 'Attractor State'. 'T' routes connection.";
+                
+                // Define 3 cluster centers
+                const clusters = [
+                    {x: 25, y: 30, color: '#ccfbf1'},
+                    {x: 75, y: 30, color: '#ffedd5'},
+                    {x: 50, y: 80, color: '#e0e7ff'}
+                ];
+
+                nodes.forEach((node, i) => {
+                    if (i === 0) {
+                        // Teacher as Router (moving between)
+                        node.style.left = '50%';
+                        node.style.top = '50%';
+                        node.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                        node.style.backgroundColor = '#14b8a6'; // Teal for Router
+                        node.style.color = 'white';
+                        node.style.zIndex = 20;
+                    } else {
+                        // Assign to random cluster
+                        const cluster = clusters[(i - 1) % 3];
+                        // Add jitter
+                        const jitterX = (Math.random() - 0.5) * 20;
+                        const jitterY = (Math.random() - 0.5) * 20;
+                        
+                        node.style.left = `${cluster.x + jitterX}%`;
+                        node.style.top = `${cluster.y + jitterY}%`;
+                        node.style.transform = 'translate(-50%, -50%)';
+                        node.style.backgroundColor = cluster.color;
+                        node.style.border = '1px solid rgba(0,0,0,0.1)';
+                    }
+                });
+            }
+
+            document.getElementById('btn-central').onclick = setCentralized;
+            document.getElementById('btn-mesh').onclick = setMesh;
+
+            // Init default
+            setTimeout(setMesh, 100);
+        }
+
+        // --- 2. Ontology Simulation (Annealing Thermometer) ---
+        function initOntologySim() {
+            const container = document.getElementById('interactive-canvas');
+            container.innerHTML = `
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-stone-700 mb-2">Base State Temperature (Energy)</label>
+                            <input type="range" id="temp-slider" min="0" max="100" value="20" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                            <div class="flex justify-between text-xs text-stone-400 mt-1">
+                                <span>Frozen (Rigid)</span>
+                                <span>Annealing (Flexible)</span>
+                                <span>Plasma (Chaos)</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-stone-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-stone-800 mb-2">System Status: <span id="sys-status" class="text-stone-500">Rigid</span></h4>
+                            <p id="sys-desc" class="text-sm text-stone-600">The structure is too cold. No learning (realignment) can occur. It resists input.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <div id="crystal-box" class="w-48 h-48 bg-stone-100 rounded-xl border-2 border-dashed border-stone-300 flex flex-wrap content-center justify-center p-2 gap-1 transition-all duration-500">
+                            <!-- Cells generated by JS -->
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const box = document.getElementById('crystal-box');
+            const slider = document.getElementById('temp-slider');
+            const status = document.getElementById('sys-status');
+            const desc = document.getElementById('sys-desc');
+            const cells = [];
+
+            // Gen cells
+            for(let i=0; i<16; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'w-8 h-8 bg-stone-400 rounded transition-all duration-300';
+                box.appendChild(cell);
+                cells.push(cell);
+            }
+
+            function updateCrystal() {
+                const val = parseInt(slider.value);
+                
+                if (val < 40) {
+                    // Frozen
+                    status.textContent = "Rigid (Tabula Rasa Fails)";
+                    status.className = "text-stone-500 font-bold";
+                    desc.textContent = "Student is defensive or bored. Structure is locked. Input bounces off.";
+                    box.className = "w-48 h-48 bg-stone-100 rounded-xl border-2 border-stone-300 flex flex-wrap content-center justify-center p-2 gap-1";
+                    cells.forEach(c => {
+                        c.className = 'w-8 h-8 bg-stone-400 rounded transform rotate-0';
+                    });
+                } else if (val >= 40 && val <= 75) {
+                    // Annealing (Sweet Spot)
+                    status.textContent = "Resonance (Annealing)";
+                    status.className = "text-teal-600 font-bold";
+                    desc.textContent = "Optimal state. Structure is malleable. Learning realigns the crystal structure effectively.";
+                    box.className = "w-48 h-48 bg-teal-50 rounded-xl border-2 border-teal-300 flex flex-wrap content-center justify-center p-2 gap-2 shadow-lg scale-105";
+                    cells.forEach((c, i) => {
+                        // Align them beautifully
+                        c.className = 'w-8 h-8 bg-teal-500 rounded-full transform scale-90';
+                    });
+                } else {
+                    // Chaos
+                    status.textContent = "High Entropy (Chaos)";
+                    status.className = "text-orange-600 font-bold";
+                    desc.textContent = "Too much energy/stress. Structure dissolves. Information is lost in noise.";
+                    box.className = "w-48 h-48 bg-orange-50 rounded-xl border-2 border-orange-300 flex flex-wrap content-center justify-center p-2 gap-4";
+                    cells.forEach(c => {
+                        const rot = Math.random() * 360;
+                        const x = (Math.random() - 0.5) * 20;
+                        const y = (Math.random() - 0.5) * 20;
+                        c.className = 'w-8 h-8 bg-orange-400 rounded-sm';
+                        c.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+                    });
+                }
+            }
+
+            slider.addEventListener('input', updateCrystal);
+            updateCrystal();
+        }
+
+        // --- 3. Inputs Simulation (Sine Wave Gate) ---
+        function initInputSim() {
+            const container = document.getElementById('interactive-canvas');
+            container.innerHTML = `
+                <div class="flex flex-col gap-4">
+                    <div class="flex justify-between items-end mb-2">
+                        <div>
+                            <h4 class="font-bold text-stone-800">Signal Gate Negotiator</h4>
+                            <p class="text-xs text-stone-500">Wait for High Gain (Peak) to Inject Lesson</p>
+                        </div>
+                        <div class="text-right">
+                            <span id="score-display" class="text-2xl font-bold text-stone-300">0</span>
+                            <span class="text-xs text-stone-400 block uppercase">Resonance Score</span>
+                        </div>
+                    </div>
+                    <div class="chart-container h-48 bg-white border border-stone-100 rounded-lg shadow-inner">
+                        <canvas id="waveChart"></canvas>
+                    </div>
+                    <button id="inject-btn" class="w-full py-4 bg-stone-800 hover:bg-black text-white rounded-lg font-bold tracking-widest transition active:scale-95">
+                        INJECT DATA PACKET
+                    </button>
+                    <div id="feedback-msg" class="h-6 text-center text-sm font-medium text-stone-400">System Ready...</div>
+                </div>
+            `;
+
+            const ctx = document.getElementById('waveChart').getContext('2d');
+            const feedback = document.getElementById('feedback-msg');
+            const scoreDisplay = document.getElementById('score-display');
+            let score = 0;
+            let time = 0;
+
+            // Setup Chart
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 50}, (_, i) => i),
+                    datasets: [{
+                        label: 'Dopamine/Interest Signal',
+                        data: [],
+                        borderColor: '#14b8a6', // Teal
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(20, 184, 166, 0.1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        x: { display: false },
+                        y: { min: -1.5, max: 1.5, display: false }
+                    },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+
+            // Animation Loop
+            simulationInterval = setInterval(() => {
+                time += 0.1;
+                const data = [];
+                for(let i=0; i<50; i++) {
+                    // Simple Sine wave moving
+                    data.push(Math.sin(time + (i * 0.2)));
+                }
+                chart.data.datasets[0].data = data;
+                chart.update();
+            }, 50);
+
+            // Click Handler
+            document.getElementById('inject-btn').onclick = () => {
+                // Get current value at the "Now" point (end of chart roughly)
+                const currentVal = Math.sin(time + (49 * 0.2));
+                
+                if (currentVal > 0.7) {
+                    // High Gain - Success
+                    score += 100;
+                    feedback.textContent = "GATE OPEN: Resonance Achieved! (+100)";
+                    feedback.className = "h-6 text-center text-sm font-bold text-teal-600";
+                    scoreDisplay.classList.add('text-teal-600');
+                    setTimeout(() => scoreDisplay.classList.remove('text-teal-600'), 300);
+                } else if (currentVal < -0.5) {
+                    // Gate Closed - Fail
+                    score -= 50;
+                    feedback.textContent = "GATE CLOSED: Information Rejected. Trauma/Boredom. (-50)";
+                    feedback.className = "h-6 text-center text-sm font-bold text-red-500";
+                } else {
+                    // Neutral
+                    feedback.textContent = "Signal Weak. Packet lost in noise.";
+                    feedback.className = "h-6 text-center text-sm font-medium text-stone-400";
+                }
+                scoreDisplay.textContent = score;
+            };
+        }
+
+        // --- 4. Fail-Safe Sim (Decision Tree) ---
+        function initFailSafeSim() {
+            const container = document.getElementById('interactive-canvas');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Scenario Control -->
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-stone-800">Trigger Student State</h4>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="runScenario('manic')" class="text-left px-4 py-3 bg-white border border-stone-200 rounded hover:bg-stone-50 transition flex justify-between items-center group">
+                                <span>Hypomanic Creativity</span>
+                                <span class="text-stone-300 group-hover:text-stone-500">→</span>
+                            </button>
+                            <button onclick="runScenario('rote')" class="text-left px-4 py-3 bg-white border border-stone-200 rounded hover:bg-stone-50 transition flex justify-between items-center group">
+                                <span>Rote Memorization Loop</span>
+                                <span class="text-stone-300 group-hover:text-stone-500">→</span>
+                            </button>
+                            <button onclick="runScenario('trauma')" class="text-left px-4 py-3 bg-white border border-stone-200 rounded hover:bg-stone-50 transition flex justify-between items-center group">
+                                <span>Trauma / Rejection</span>
+                                <span class="text-stone-300 group-hover:text-stone-500">→</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- System Response Log -->
+                    <div class="bg-stone-900 text-stone-300 p-4 rounded-lg font-mono text-xs overflow-hidden h-64 flex flex-col">
+                        <div class="border-b border-stone-700 pb-2 mb-2 flex justify-between">
+                            <span>VIXEN_OS_TERMINAL</span>
+                            <span class="text-teal-500">● LIVE</span>
+                        </div>
+                        <div id="console-log" class="flex-grow overflow-y-auto space-y-2">
+                            <p>> System initialized.</p>
+                            <p>> Waiting for student input...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Make runScenario global so HTML can see it
+            window.runScenario = (type) => {
+                const consoleLog = document.getElementById('console-log');
+                const addLog = (text, color = 'text-stone-300') => {
+                    const p = document.createElement('p');
+                    p.innerHTML = `<span class="opacity-50">></span> ${text}`;
+                    p.className = color;
+                    consoleLog.appendChild(p);
+                    consoleLog.scrollTop = consoleLog.scrollHeight;
+                };
+
+                addLog(`Detected State: [${type.toUpperCase()}]`, 'text-white font-bold mt-2');
+
+                if (type === 'manic') {
+                    // Factory vs Vixen
+                    setTimeout(() => addLog("Analyzing fail-safe protocols...", 'text-stone-500'), 500);
+                    setTimeout(() => addLog("⚠ FACTORY MODEL: Flagged as 'Disruptive'. Outcome: Detention.", 'text-red-400'), 1200);
+                    setTimeout(() => addLog("✔ VIXEN PROTOCOL: 'Syntax Anchor' Deployed.", 'text-teal-400'), 2000);
+                    setTimeout(() => addLog("  ↳ Providing structure templates to channel energy.", 'text-teal-200 pl-4'), 2500);
+                } else if (type === 'rote') {
+                    setTimeout(() => addLog("Analyzing fail-safe protocols...", 'text-stone-500'), 500);
+                    setTimeout(() => addLog("⚠ FACTORY MODEL: Grade 'A'. Encourages looping.", 'text-red-400'), 1200);
+                    setTimeout(() => addLog("✔ VIXEN PROTOCOL: 'Black Mirror' Detected.", 'text-teal-400'), 2000);
+                    setTimeout(() => addLog("  ↳ Refracting loop with 'Play/Application' task.", 'text-teal-200 pl-4'), 2500);
+                } else if (type === 'trauma') {
+                    setTimeout(() => addLog("Analyzing fail-safe protocols...", 'text-stone-500'), 500);
+                    setTimeout(() => addLog("⚠ FACTORY MODEL: Input forced. Damage increased.", 'text-red-400'), 1200);
+                    setTimeout(() => addLog("✔ VIXEN PROTOCOL: 'Consent Gate' Locked.", 'text-teal-400'), 2000);
+                    setTimeout(() => addLog("  ↳ Initiating 'Aftercare Protocol' to rebuild Trust(β).", 'text-teal-200 pl-4'), 2500);
+                }
+            };
+        }
+
+        // --- 5. Potentialities (State Toggle) ---
+        function initPotentialSim() {
+            const container = document.getElementById('interactive-canvas');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-center gap-2">
+                        <button onclick="setZone('ignition')" class="px-4 py-2 border border-stone-200 rounded hover:bg-orange-50 focus:ring-2 ring-orange-200 transition">Ignition Zone</button>
+                        <button onclick="setZone('flow')" class="px-4 py-2 border border-stone-200 rounded hover:bg-teal-50 focus:ring-2 ring-teal-200 transition">Flow Zone</button>
+                        <button onclick="setZone('shutdown')" class="px-4 py-2 border border-stone-200 rounded hover:bg-stone-100 focus:ring-2 ring-stone-200 transition">Shutdown Zone</button>
+                    </div>
+
+                    <div id="wumbo-room" class="relative w-full h-64 rounded-xl border transition-all duration-700 overflow-hidden flex items-center justify-center p-8 bg-stone-50 border-stone-200">
+                        <div class="text-center z-10">
+                            <h2 id="zone-title" class="text-2xl font-bold mb-2 text-stone-800">The Wumbo Classroom</h2>
+                            <p id="zone-text" class="text-stone-500">Select a neural state zone above to reconfigure the environment.</p>
+                        </div>
+                        <!-- Background elements -->
+                        <div id="zone-bg" class="absolute inset-0 opacity-10 transition-colors duration-700 bg-stone-200"></div>
+                    </div>
+                </div>
+            `;
+
+            window.setZone = (zone) => {
+                const room = document.getElementById('wumbo-room');
+                const title = document.getElementById('zone-title');
+                const text = document.getElementById('zone-text');
+                const bg = document.getElementById('zone-bg');
+
+                if (zone === 'ignition') {
+                    room.className = "relative w-full h-64 rounded-xl border transition-all duration-700 overflow-hidden flex items-center justify-center p-8 bg-orange-50 border-orange-200 shadow-inner";
+                    title.textContent = "IGNITION ZONE";
+                    title.className = "text-3xl font-black mb-2 text-orange-600 tracking-tighter uppercase";
+                    text.textContent = "High Energy. Chaos permitted. Short bursts of intense competition or brainstorming. 'Gamified Gnosis' active.";
+                    bg.className = "absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-400 to-transparent animate-pulse";
+                } else if (zone === 'flow') {
+                    room.className = "relative w-full h-64 rounded-xl border transition-all duration-700 overflow-hidden flex items-center justify-center p-8 bg-teal-50 border-teal-200";
+                    title.textContent = "Flow State";
+                    title.className = "text-3xl font-serif italic mb-2 text-teal-700";
+                    text.textContent = "Deep Work. Distractions removed. Syntax Anchors available. Time dilation effect.";
+                    bg.className = "absolute inset-0 opacity-10 bg-teal-400";
+                } else if (zone === 'shutdown') {
+                    room.className = "relative w-full h-64 rounded-xl border transition-all duration-700 overflow-hidden flex items-center justify-center p-8 bg-stone-900 border-stone-800";
+                    title.textContent = "Shutdown / Integration";
+                    title.className = "text-xl font-mono mb-2 text-stone-400";
+                    text.textContent = "Low sensory input. Dark mode. Integration of data into long-term memory. 'Aftercare' active.";
+                    bg.className = "absolute inset-0 opacity-5 bg-black";
+                }
+            };
+        }
+
+        // Initialize App
+        window.onload = init;
+
+    </script>
+</body>
+</html>
