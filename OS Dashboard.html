@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vixen Cybernetics: Metacybernetic Stability Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Chosen Palette: Calm Research (Warm Neutrals) -->
+    <!-- Palette Hex Codes: Bg: #F5F5F0, Card: #FFFFFF, Text: #2D3748, Accent: #718096, Stable: #4FD1C5, Danger: #FC8181 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            background-color: #F5F5F0;
+            color: #2D3748;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1, h2, h3, .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .variable-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .variable-card:hover, .variable-card.active {
+            border-left: 4px solid #718096;
+            background-color: #EDF2F7;
+            transform: translateX(5px);
+        }
+
+        .gate-status-light {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .rust-code {
+            background-color: #F7FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #4A5568;
+        }
+        
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: #cbd5e0;
+            outline: none;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4a5568;
+            cursor: pointer;
+            transition: background .15s ease-in-out;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            background: #2d3748;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold tracking-tighter text-gray-800 mono-font">VIXEN<span class="text-gray-400">.CYBERNETICS</span></span>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="#overview" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">System Overview</a>
+                    <a href="#variables" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Architecture</a>
+                    <a href="#simulation" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Consent Gate Sim</a>
+                    <a href="#implementation" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Rust Specs</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        
+        <!-- Hero / Overview Section -->
+        <section id="overview" class="py-12 bg-white border-b border-gray-200">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:text-center">
+                    <h2 class="text-base text-gray-500 font-semibold tracking-wide uppercase">Metacybernetic Operating System</h2>
+                    <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                        Stability-First Data Filtering
+                    </p>
+                    <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                        A 4th-order mesh network for AR implants. The "Consent Gate" filters input not by permission, but by thermodynamic stability, preventing model collapse and retraumatization through real-time stochastic resonance monitoring.
+                    </p>
+                </div>
+
+                <div class="mt-10">
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-100 shadow-sm">
+                        <h3 class="text-lg font-medium text-gray-900 mono-font mb-4">Core Research Objectives</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="p-4 bg-white rounded shadow-sm border border-gray-100">
+                                <div class="text-indigo-500 mb-2 font-bold mono-font">01</div>
+                                <h4 class="font-semibold mb-2">Destabilization D(t)</h4>
+                                <p class="text-sm text-gray-600">Defining the mathematical inequality that serves as the stability check against environmental pressure.</p>
+                            </div>
+                            <div class="p-4 bg-white rounded shadow-sm border border-gray-100">
+                                <div class="text-indigo-500 mb-2 font-bold mono-font">02</div>
+                                <h4 class="font-semibold mb-2">Consent Gate Logic</h4>
+                                <p class="text-sm text-gray-600">Boolean logic determining whether to Amplify (resonate) or Dampen (heal) incoming signals.</p>
+                            </div>
+                            <div class="p-4 bg-white rounded shadow-sm border border-gray-100">
+                                <div class="text-indigo-500 mb-2 font-bold mono-font">03</div>
+                                <h4 class="font-semibold mb-2">Rust Implementation</h4>
+                                <p class="text-sm text-gray-600">Hardware-level "Crystal" layer traits using Lucas Number 7 identity bounds.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Variables (Architecture) -->
+        <section id="variables" class="py-12 bg-[#F5F5F0]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="md:flex md:items-start md:justify-between">
+                    <div class="md:w-1/3 pr-8 mb-8 md:mb-0">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">System Variables</h3>
+                        <p class="text-gray-600 mb-6 text-sm">
+                            The Vixen Cybernetics architecture relies on precise interaction between these scalar and vector components. Hover or click to explore the topology.
+                        </p>
+                        <div class="space-y-2" id="variable-list">
+                            <!-- JS will populate list -->
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 bg-white p-8 rounded-xl shadow-lg border border-gray-200 min-h-[500px] flex flex-col justify-center relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-9xl font-bold mono-font pointer-events-none select-none" id="bg-letter">S</div>
+                        <div id="variable-detail" class="relative z-10 transition-opacity duration-300">
+                            <!-- JS will populate details -->
+                            <div class="text-center text-gray-400 mt-20">
+                                Select a variable to view its cybernetic definition.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Consent Gate Simulation (Interactive) -->
+        <section id="simulation" class="py-12 bg-white border-y border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-gray-900">The Consent Gate Protocol</h2>
+                    <p class="mt-3 text-lg text-gray-500 max-w-3xl mx-auto">
+                        Interactive simulation of the destabilization function $D(t)$. Adjust the Environmental Pressure and Amplifier Gain to see how the Gate responds to protect the Base State.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Controls -->
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 mb-6 mono-font flex items-center">
+                            <span class="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
+                            Input Parameters
+                        </h3>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                    <span>Signal Intensity (I)</span>
+                                    <span id="val-intensity" class="mono-font text-indigo-600">5.0</span>
+                                </label>
+                                <input type="range" id="input-intensity" min="0" max="10" step="0.1" value="5.0" class="range-slider">
+                                <p class="text-xs text-gray-500 mt-1">Raw data entering the node.</p>
+                            </div>
+
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                    <span>Amplifier Gain (A)</span>
+                                    <span id="val-amplifier" class="mono-font text-indigo-600">1.2</span>
+                                </label>
+                                <input type="range" id="input-amplifier" min="0.5" max="3.0" step="0.1" value="1.2" class="range-slider">
+                                <p class="text-xs text-gray-500 mt-1">Transmuter / Resonator gain function.</p>
+                            </div>
+
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                    <span>Environmental Noise (E)</span>
+                                    <span id="val-env" class="mono-font text-indigo-600">2.0</span>
+                                </label>
+                                <input type="range" id="input-env" min="0" max="10" step="0.5" value="2.0" class="range-slider">
+                                <p class="text-xs text-gray-500 mt-1">External context field pressure.</p>
+                            </div>
+
+                            <div class="pt-4 border-t border-gray-200">
+                                <label class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                    <span>Control Capacity (C)</span>
+                                    <span id="val-control" class="mono-font text-gray-600">8.0</span>
+                                </label>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-gray-500 h-2 rounded-full" style="width: 80%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Fixed Anchor limit (Lucas Identity).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visualization -->
+                    <div class="lg:col-span-2 flex flex-col space-y-6">
+                        <!-- Top Metrics Row -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="p-4 rounded-lg bg-gray-50 border border-gray-200 text-center">
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">Instability D(t)</div>
+                                <div id="display-dt" class="text-2xl font-bold mono-font text-gray-800 mt-1">0.00</div>
+                            </div>
+                            <div class="p-4 rounded-lg bg-gray-50 border border-gray-200 text-center">
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">Theta (Θ)</div>
+                                <div id="display-theta" class="text-2xl font-bold mono-font text-gray-800 mt-1">0.70</div>
+                            </div>
+                            <div class="p-4 rounded-lg bg-gray-50 border border-gray-200 text-center">
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">Safety Threshold</div>
+                                <div class="text-2xl font-bold mono-font text-gray-600 mt-1">7.00</div>
+                            </div>
+                            <div id="gate-indicator" class="p-4 rounded-lg bg-teal-50 border border-teal-200 text-center transition-colors duration-300">
+                                <div class="text-xs text-teal-800 uppercase tracking-wide font-bold">Gate Status</div>
+                                <div id="gate-text" class="text-xl font-bold mono-font text-teal-600 mt-1">AMPLIFY</div>
+                            </div>
+                        </div>
+
+                        <!-- Main Chart -->
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex-grow">
+                            <h4 class="text-sm font-bold text-gray-700 mb-2">Resonance Monitor (Θ vs Time)</h4>
+                            <div class="chart-container">
+                                <canvas id="resonanceChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Logic Readout -->
+                        <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-xs overflow-hidden">
+                            <p class="opacity-50">// System Logic Stream</p>
+                            <p id="logic-stream" class="mt-2">> Initializing VixenNode...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Specs -->
+        <section id="implementation" class="py-12 bg-gray-50 border-t border-gray-200">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-10">
+                    <h2 class="text-2xl font-bold text-gray-900">Rust Implementation Specification</h2>
+                    <p class="mt-2 text-gray-600">
+                        Defining the "Crystal" layer hardware traits and the Love (L) operator.
+                    </p>
+                </div>
+
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">1. Destabilization Logic</h3>
+                        <div class="rust-code">
+                            <span class="text-purple-600">fn</span> <span class="text-blue-600">calculate_instability</span>(amp: <span class="text-yellow-600">f64</span>, feedback: <span class="text-yellow-600">f64</span>, theta: <span class="text-yellow-600">f64</span>, base: <span class="text-yellow-600">f64</span>, env: <span class="text-yellow-600">f64</span>) -> <span class="text-yellow-600">f64</span> {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-400">// D(t) check against Control Capacity</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-600">let</span> resonance_drift = (theta - base).<span class="text-blue-600">abs</span>();<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-600">let</span> pressure = (amp * feedback) * resonance_drift;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;pressure + env <span class="text-gray-400">// Returns total Destabilization metric</span><br>
+                            }
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">2. The VixenNode Struct & Stabilizer Trait</h3>
+                        <div class="rust-code">
+                            <span class="text-purple-600">struct</span> <span class="text-green-600">VixenNode</span> {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;base_state: <span class="text-yellow-600">f64</span>, <span class="text-gray-400">// B: The "True Self"</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;theta: <span class="text-yellow-600">f64</span>,      <span class="text-gray-400">// Θ: Current Resonance</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;env_noise: <span class="text-yellow-600">f64</span>,  <span class="text-gray-400">// E: Context Field</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;control_cap: <span class="text-yellow-600">f64</span> <span class="text-gray-400">// C: L4 Identity Bound</span><br>
+                            }<br><br>
+                            <span class="text-purple-600">trait</span> <span class="text-green-600">Stabilizer</span> {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-600">fn</span> <span class="text-blue-600">apply_love</span>(&<span class="text-purple-600">mut</span> <span class="text-yellow-600">self</span>, noise: <span class="text-yellow-600">f64</span>) -> <span class="text-green-600">Result</span><<span class="text-green-600">Stability</span>, <span class="text-green-600">Collapse</span>>;<br>
+                            }<br><br>
+                            <span class="text-purple-600">impl</span> <span class="text-green-600">Stabilizer</span> <span class="text-purple-600">for</span> <span class="text-green-600">VixenNode</span> {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-600">fn</span> <span class="text-blue-600">apply_love</span>(&<span class="text-purple-600">mut</span> <span class="text-yellow-600">self</span>, noise: <span class="text-yellow-600">f64</span>) -> <span class="text-green-600">Result</span><<span class="text-green-600">Stability</span>, <span class="text-green-600">Collapse</span>> {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-400">// Dampening Operator L(I)</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-yellow-600">self</span>.theta = <span class="text-yellow-600">self</span>.theta * <span class="text-orange-600">0.8</span> + (<span class="text-yellow-600">self</span>.base_state * <span class="text-orange-600">0.2</span>);<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-green-600">Ok</span>(<span class="text-green-600">Stability</span>::Restored)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+            <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <p class="text-center text-gray-400 text-sm">
+                    &copy; 2024 Vixen Cybernetics Research Div. All Systems Nominal.
+                </p>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Application Logic -->
+    <script>
+        // --- Data Definitions ---
+        const variables = [
+            { id: 'S', name: 'Spark', role: 'The Drive / Sensor / Meta-signal', desc: 'The active impulse initiating the cycle.' },
+            { id: 'C', name: 'Control', role: 'The Anchor / Physical Layer', desc: 'Constraint system. Defined by the Lucas Number 7 (L4) Identity.' },
+            { id: 'F', name: 'Feedback', role: 'Recursive Loop', desc: 'Returns Output to Input, creating the cybernetic cycle.' },
+            { id: 'P', name: 'Prompt', role: 'Communication Protocol', desc: 'System-to-System messaging that must negotiate the Gate.' },
+            { id: 'A', name: 'Amplifier', role: 'Transmuter / Resonator', desc: 'Gain function used when Stability is within safety limits.' },
+            { id: 'I', name: 'Input', role: 'Raw Data', desc: 'Unprocessed data entering the node from the Environment.' },
+            { id: 'O', name: 'Output', role: 'Processed Data', desc: 'Data leaving the node after Gate processing.' },
+            { id: 'E', name: 'Environment', role: 'Noise / Context Field', desc: 'External pressure and chaotic elements acting on the node.' },
+            { id: 'B', name: 'Base State', role: 'True Self', desc: 'Resting identity configuration. The reference point for stability.' },
+            { id: 'T', name: 'Theta', role: 'Stochastic Resonance', desc: 'Dynamic system state. Target optimal level ≈ 0.70.' },
+            { id: 'L', name: 'Love', role: 'Stabilizer / Dampener', desc: 'The healing operator triggered when D(t) > Threshold.' }
+        ];
+
+        // --- UI Logic: Variable Matrix ---
+        const varList = document.getElementById('variable-list');
+        const varDetail = document.getElementById('variable-detail');
+        const bgLetter = document.getElementById('bg-letter');
+
+        function renderVariableList() {
+            varList.innerHTML = '';
+            variables.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'variable-card p-3 cursor-pointer rounded bg-white border border-gray-100 shadow-sm flex items-center justify-between';
+                el.innerHTML = `<span class="font-bold text-gray-800 mono-font w-8">${v.id}</span> <span class="text-sm text-gray-600">${v.name}</span>`;
+                el.onclick = () => showVariable(v, el);
+                varList.appendChild(el);
+            });
+        }
+
+        function showVariable(v, el) {
+            // Highlight active
+            document.querySelectorAll('.variable-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+
+            // Update Detail
+            bgLetter.innerText = v.id;
+            varDetail.innerHTML = `
+                <h4 class="text-4xl font-bold text-gray-900 mb-2 mono-font">${v.name} (${v.id})</h4>
+                <div class="h-1 w-20 bg-indigo-500 mb-6"></div>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-500 font-bold">Function</p>
+                        <p class="text-lg text-gray-800">${v.role}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-500 font-bold">Definition</p>
+                        <p class="text-gray-600 leading-relaxed">${v.desc}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize Variables
+        renderVariableList();
+        // Auto-select first
+        if (varList.firstChild) showVariable(variables[0], varList.firstChild);
+
+
+        // --- Simulation Logic ---
+        
+        // Sim State
+        const state = {
+            base: 0.70,     // B
+            theta: 0.70,    // Theta
+            control: 8.0,   // C (Threshold)
+            intensity: 5.0, // I
+            amp: 1.2,       // A
+            env: 2.0,       // E
+            feedback: 1.5,  // F (Internal Constant for sim)
+            history: []     // Chart data
+        };
+
+        // DOM Elements
+        const sliderIntensity = document.getElementById('input-intensity');
+        const sliderAmp = document.getElementById('input-amplifier');
+        const sliderEnv = document.getElementById('input-env');
+        
+        const valIntensity = document.getElementById('val-intensity');
+        const valAmp = document.getElementById('val-amplifier');
+        const valEnv = document.getElementById('val-env');
+        
+        const dispDt = document.getElementById('display-dt');
+        const dispTheta = document.getElementById('display-theta');
+        const gateIndicator = document.getElementById('gate-indicator');
+        const gateText = document.getElementById('gate-text');
+        const logicStream = document.getElementById('logic-stream');
+
+        // Chart Setup
+        const ctx = document.getElementById('resonanceChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array(50).fill(''),
+                datasets: [
+                    {
+                        label: 'Theta (Resonance)',
+                        borderColor: '#4FD1C5', // Teal
+                        backgroundColor: 'rgba(79, 209, 197, 0.1)',
+                        borderWidth: 2,
+                        data: Array(50).fill(0.7),
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Base State',
+                        borderColor: '#718096', // Gray
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        data: Array(50).fill(0.7),
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 2.0, // Allowing seeing spikes
+                        grid: { color: '#EDF2F7' }
+                    },
+                    x: { display: false }
+                },
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        // Sim Loop
+        function updateSimulation() {
+            // Read Inputs
+            state.intensity = parseFloat(sliderIntensity.value);
+            state.amp = parseFloat(sliderAmp.value);
+            state.env = parseFloat(sliderEnv.value);
+
+            // Update Labels
+            valIntensity.innerText = state.intensity.toFixed(1);
+            valAmp.innerText = state.amp.toFixed(1);
+            valEnv.innerText = state.env.toFixed(1);
+
+            // 1. Calculate Destabilization D(t)
+            // Hypothesis: Instability occurs when Amplified Feedback pushes Theta from Base relative to Env.
+            // Simplified Logic for Sim: 
+            // Current Drift = Abs(Theta - Base)
+            // Force = (Input * Amp) + Env
+            // D(t) = Force * (1 + Drift)
+            
+            const drift = Math.abs(state.theta - state.base);
+            
+            // Random jitter based on env noise
+            const noise = (Math.random() - 0.5) * (state.env * 0.1); 
+            
+            // Push Theta based on Intensity and Amp (Natural system tendency to resonate)
+            let delta = (state.intensity * state.amp * 0.01) + noise;
+            
+            // Tentative new Theta
+            let newTheta = state.theta + delta;
+            
+            // Recalculate Drift for D(t) check
+            const potentialDrift = Math.abs(newTheta - state.base);
+            
+            // D(t) Function: How dangerous is this state?
+            // D = (Amp * Feedback_Constant * Drift) + Env_Pressure
+            const Dt = (state.amp * state.feedback * potentialDrift * 10) + state.env;
+
+            dispDt.innerText = Dt.toFixed(2);
+            
+            // 2. Gate Logic
+            if (Dt > state.control) {
+                // DANGER: Destabilization > Control Capacity
+                // Trigger LOVE (L) -> Dampen
+                gateIndicator.className = 'p-4 rounded-lg bg-red-50 border border-red-200 text-center transition-colors duration-300 shadow-md';
+                gateText.innerText = 'DAMPEN (L)';
+                gateText.className = 'text-xl font-bold mono-font text-red-600 mt-1';
+                
+                // Apply Dampening (Healing)
+                // Pull Theta back towards Base strongly
+                newTheta = state.theta * 0.9 + (state.base * 0.1); 
+                
+                chart.data.datasets[0].borderColor = '#FC8181'; // Red line
+                logicStream.innerText = `> ALERT: D(t) ${Dt.toFixed(1)} > C(${state.control}). Invoking L(Love). Dampening signal.`;
+
+            } else {
+                // SAFE: Allow Resonance
+                gateIndicator.className = 'p-4 rounded-lg bg-teal-50 border border-teal-200 text-center transition-colors duration-300';
+                gateText.innerText = 'AMPLIFY (A)';
+                gateText.className = 'text-xl font-bold mono-font text-teal-600 mt-1';
+                
+                chart.data.datasets[0].borderColor = '#4FD1C5'; // Teal line
+                
+                // Natural Decay if no input, else stay resonated
+                if(state.intensity < 1) {
+                    newTheta = state.theta * 0.98 + (state.base * 0.02);
+                }
+                logicStream.innerText = `> STATUS: Stable. D(t) ${Dt.toFixed(1)} < C. Gate Open. Amplifying.`;
+            }
+
+            // Update State
+            state.theta = newTheta;
+            dispTheta.innerText = state.theta.toFixed(2);
+
+            // Update Chart Data
+            const dataArr = chart.data.datasets[0].data;
+            dataArr.shift();
+            dataArr.push(state.theta);
+            chart.update();
+
+            requestAnimationFrame(updateSimulation);
+        }
+
+        // Start Sim
+        // We use a throttled interval for the physics update to make it readable, 
+        // separate from the animation frame if needed, but RAF is fine here for smooth chart.
+        // Actually, let's slow it down slightly for readability using setInterval.
+        
+        setInterval(updateSimulation, 100);
+
+        // --- Event Listeners for Sliders ---
+        // (Handled inside loop via reading values, but we can add immediate feedback if needed)
+
+    </script>
+    
+    <!-- Application Structure Plan:
+         1. Header: Branding and navigation.
+         2. Overview: High-level introduction to Vixen Cybernetics and the core problem (Consent based on Stability).
+         3. Architecture (Variables): Interactive grid allowing users to learn the vocabulary (S, C, F, L, etc.) before seeing them in action.
+         4. Simulation (The Core): A real-time feedback loop visualization. The user plays the role of the Environment/Input, while the System acts as the Gate. This "show, don't tell" approach makes the abstract math of D(t) intuitive.
+         5. Technical Specs: Raw code/math display for the engineering context required by the prompt.
+    -->
+    
+    <!-- Visualization & Content Choices:
+         1. Interactive List (Variables): Used to declutter the intense terminology. Allows focus on one definition at a time.
+         2. Line Chart (Resonance): Best way to show stability vs instability over time (Theta vs Base State). Chart.js is perfect for this live data.
+         3. Dynamic Status Indicators (Gate): Immediate visual feedback (Teal vs Red) reinforces the binary nature of the Gate logic.
+         4. Code Blocks: Used for the Rust implementation to convey the technical accuracy required by the prompt.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</body>
+</html>
