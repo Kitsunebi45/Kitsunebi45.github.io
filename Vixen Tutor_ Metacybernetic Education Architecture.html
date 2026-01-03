@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vixen Tutor: Metacybernetic Learning Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fbfbfa; /* Warm neutral background */
+            color: #44403c; /* Stone 700 */
+        }
+
+        h1, h2, h3 {
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.025em;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Chart Container Styling - MANDATORY */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width to prevent stretching */
+            height: 350px;    /* Base height */
+            max-height: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        /* Custom Scrollbar for panel feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .active-protocol {
+            border-left: 4px solid #0d9488; /* Teal 600 */
+            background-color: #f0fdfa; /* Teal 50 */
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        teal: {
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        },
+                        rose: {
+                            500: '#f43f5e',
+                        },
+                        amber: {
+                            500: '#f59e0b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Teal (Resonance) and Rose (Entropy) accents. Minimalist and academic. -->
+    <!-- Application Structure Plan: 
+         1. Header: Philosophy & Context.
+         2. Topology Section: Visualizing the "Mesh-Stigmergy" vs "Factory Model". User explores the network.
+         3. Ontology Section: "Recursive Identity Seed" - Interactive radar chart for student state tuning.
+         4. Fail-Safe Simulator: The core "Vixen Tutor" logic. User triggers anomalies, system responds with specific Vixen protocols (Anchor, Mirror, Repair).
+         5. Data Stream: "Just-in-Time Resonance" analytics comparing Factory vs Vixen outcomes over time.
+         Rationale: This flows from Macro (Network) to Micro (Student) to Action (Protocol) to Result (Data), guiding the user through the Vixen architecture logic.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Network Topology: Plotly Scatter. Goal: Show P2P grouping. Interaction: Hover/Filter.
+         2. Student Profile: Chart.js Radar. Goal: Visualize the "Seed" state. Interaction: Sliders update chart.
+         3. Fail-Safe Logic: HTML/JS Interactive State Machine. Goal: Demonstrate the "Router" logic. Interaction: Buttons trigger DOM updates.
+         4. Entropy Impact: Chart.js Line. Goal: Compare Factory vs Vixen efficiency. Interaction: Toggle datasets.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Header Section -->
+    <header class="w-full bg-white border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 bg-teal-600 rounded-full animate-pulse"></div>
+                <h1 class="text-xl font-bold tracking-tight text-stone-900">Vixen<span class="font-light text-stone-500">Tutor_Interface</span> <span class="text-xs align-top bg-stone-100 px-2 py-0.5 rounded text-stone-500 ml-2">v2.5.0-RC</span></h1>
+            </div>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium text-stone-600">
+                <a href="#topology" class="hover:text-teal-600 transition-colors">I. Topology</a>
+                <a href="#ontology" class="hover:text-teal-600 transition-colors">II. Ontology</a>
+                <a href="#failsafe" class="hover:text-teal-600 transition-colors">III. Fail-Safes</a>
+                <a href="#analytics" class="hover:text-teal-600 transition-colors">IV. Analytics</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- Introduction -->
+        <section class="max-w-3xl mx-auto text-center space-y-6">
+            <h2 class="text-4xl font-extrabold text-stone-900 sm:text-5xl">Architectures of <span class="text-teal-600">Resonance</span></h2>
+            <p class="text-lg text-stone-600 leading-relaxed">
+                The current educational paradigm ("Factory Model") is <span class="font-semibold text-rose-500">Allopoietic</span>—it treats students as raw material to be processed by force, generating trauma and entropy. 
+                The <strong>Vixen Protocol</strong> proposes a <span class="font-semibold text-teal-600">Metacybernetic</span> alternative: an AI-assisted "Heat Sink" that manages emotional energy, connects peers via mesh-stigmergy, and protects the learner's mind through fail-safe architectures.
+            </p>
+            <div class="flex justify-center gap-4 pt-4">
+                <button onclick="document.getElementById('topology').scrollIntoView({behavior: 'smooth'})" class="px-6 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-700 transition shadow-lg text-sm font-medium">Initialize Diagnostic</button>
+            </div>
+        </section>
+
+        <!-- Section I: Topology (Network) -->
+        <section id="topology" class="scroll-mt-24">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-stone-100 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                        <span>Vector I</span>
+                        <span class="text-stone-300">|</span>
+                        <span>Network Structure</span>
+                    </div>
+                    <h3 class="text-3xl font-bold text-stone-900">Mesh-Stigmergy vs. Centralization</h3>
+                    <p class="text-stone-600 leading-relaxed">
+                        Traditional classrooms operate on a <strong>Hub-and-Spoke</strong> topology: the Teacher is the single source of truth, creating a single point of failure. When the connection breaks, the student drifts.
+                    </p>
+                    <p class="text-stone-600 leading-relaxed">
+                        The Vixen Tutor employs <strong>Mesh-Stigmergy</strong>. Students are nodes grouped by "Attractor States" (shared interest/energy). The Teacher acts as a Router, connecting compatible nodes. Learning happens Peer-to-Peer (P2P), stabilized by the network itself.
+                    </p>
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
+                        <h4 class="font-semibold text-stone-800 border-b border-stone-100 pb-2">Topological Analysis</h4>
+                        <ul class="space-y-3 text-sm text-stone-600">
+                            <li class="flex items-start">
+                                <span class="text-rose-500 mr-2">✕</span>
+                                <span><strong>Factory Model:</strong> Fragile. If the central node (Teacher) fails or coerces, the surrounding nodes (Students) collapse.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-teal-600 mr-2">✓</span>
+                                <span><strong>Vixen Model:</strong> Resilient. Nodes support each other. High-entropy nodes are routed to "Grounding" clusters automatically.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-xl border border-stone-100 p-4">
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <span class="text-xs font-mono text-stone-400">LIVE_NET_VIEW // CLUSTER_ANALYSIS</span>
+                        <div class="flex space-x-2">
+                            <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                            <span class="text-xs text-stone-500">Resonant</span>
+                            <span class="w-2 h-2 rounded-full bg-rose-500 ml-2"></span>
+                            <span class="text-xs text-stone-500">Entropic</span>
+                        </div>
+                    </div>
+                    <!-- Chart Container for Plotly -->
+                    <div id="topologyChart" class="chart-container" style="height: 400px;"></div>
+                    <p class="text-center text-xs text-stone-400 mt-2">Interactive: Hover over nodes to see Attractor States.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section II: Ontology (The Student) -->
+        <section id="ontology" class="bg-white rounded-3xl p-8 lg:p-12 shadow-sm border border-stone-200 scroll-mt-24">
+            <div class="grid lg:grid-cols-12 gap-12">
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-stone-100 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                        <span>Vector II</span>
+                        <span class="text-stone-300">|</span>
+                        <span>Recursive Identity</span>
+                    </div>
+                    <h3 class="text-3xl font-bold text-stone-900">The Student as a Recursive System</h3>
+                    <p class="text-stone-600">
+                        The "Factory" views the student as a <em>Tabula Rasa</em> (Blank Slate). Vixen views the student as a complex system with a pre-existing <strong>Resonance Threshold (θ)</strong>. Education is not filling a bucket; it is "Annealing"—carefully heating and cooling the system's structure to align with reality without shattering it.
+                    </p>
+                    
+                    <div class="p-6 bg-stone-50 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-stone-800 mb-4">Input: Bio-State Variables</h4>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <label class="font-medium text-stone-700">System Energy (Dopamine/Nor-E)</label>
+                                    <span id="energyVal" class="font-mono text-stone-500">50%</span>
+                                </div>
+                                <input type="range" id="energySlider" min="0" max="100" value="50" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <label class="font-medium text-stone-700">Structure/Coherence (Acetylcholine)</label>
+                                    <span id="structureVal" class="font-mono text-stone-500">50%</span>
+                                </div>
+                                <input type="range" id="structureSlider" min="0" max="100" value="50" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <label class="font-medium text-stone-700">External Pressure (Stress)</label>
+                                    <span id="stressVal" class="font-mono text-stone-500">20%</span>
+                                </div>
+                                <input type="range" id="stressSlider" min="0" max="100" value="20" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 flex flex-col justify-center">
+                    <div class="bg-white rounded-xl shadow-lg border border-stone-100 p-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <span class="text-9xl font-serif">φ</span>
+                        </div>
+                        <h4 class="text-center font-bold text-stone-800 mb-2">Live Resonance Profile</h4>
+                        
+                        <!-- Chart Container for Radar -->
+                        <div class="chart-container">
+                            <canvas id="ontologyChart"></canvas>
+                        </div>
+
+                        <div id="stateDescription" class="mt-6 p-4 bg-teal-50 border border-teal-100 rounded-lg text-sm text-teal-900 transition-all duration-300">
+                            <span class="font-bold">Status: Balanced.</span> The system is capable of accepting new syntax. Gates are open.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section III: The Fail-Safes (Interactive) -->
+        <section id="failsafe" class="scroll-mt-24 space-y-8">
+            <div class="text-center max-w-3xl mx-auto">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-stone-100 text-xs font-semibold uppercase tracking-wide text-stone-500 mb-4">
+                    <span>Vector III</span>
+                    <span class="text-stone-300">|</span>
+                    <span>Safety Nets</span>
+                </div>
+                <h3 class="text-3xl font-bold text-stone-900">The Vixen Fail-Safe Protocols</h3>
+                <p class="text-stone-600 mt-4">
+                    The core of the Vixen Tutor is its ability to detect "System Crash" precursors and intervene immediately using "Heat Sinks"—mechanisms that absorb stress. This prevents the student from breaking under the load of the Factory Model.
+                </p>
+            </div>
+
+            <div class="bg-stone-900 rounded-3xl p-6 lg:p-10 shadow-2xl text-stone-100 overflow-hidden relative">
+                <!-- Terminal Decor -->
+                <div class="absolute top-4 right-6 flex space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-teal-500"></div>
+                </div>
+                <div class="font-mono text-xs text-stone-500 mb-8">VIXEN_KERNEL_ACCESS // ROOT_PRIVILEGES_GRANTED</div>
+
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <!-- Simulator Controls -->
+                    <div class="space-y-8">
+                        <div>
+                            <label class="block text-sm font-medium text-stone-400 mb-2">DETECTED_ANOMALY_INPUT</label>
+                            <div class="grid grid-cols-1 gap-3">
+                                <button onclick="triggerFailSafe('mania')" class="failsafe-btn text-left px-4 py-3 rounded bg-stone-800 border border-stone-700 hover:border-amber-500 hover:text-amber-400 transition flex items-center group">
+                                    <span class="w-2 h-2 bg-amber-500 rounded-full mr-3 group-hover:animate-ping"></span>
+                                    <div>
+                                        <div class="font-mono font-bold">ERR_HYPOMANIC_OVERFLOW</div>
+                                        <div class="text-xs text-stone-500">Excessive creativity, loose associations, manic energy.</div>
+                                    </div>
+                                </button>
+                                <button onclick="triggerFailSafe('rote')" class="failsafe-btn text-left px-4 py-3 rounded bg-stone-800 border border-stone-700 hover:border-blue-400 hover:text-blue-300 transition flex items-center group">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 group-hover:animate-ping"></span>
+                                    <div>
+                                        <div class="font-mono font-bold">ERR_INFINITE_LOOP_ROTE</div>
+                                        <div class="text-xs text-stone-500">Dissociation, mindless repetition, "Black Mirror" state.</div>
+                                    </div>
+                                </button>
+                                <button onclick="triggerFailSafe('trauma')" class="failsafe-btn text-left px-4 py-3 rounded bg-stone-800 border border-stone-700 hover:border-rose-500 hover:text-rose-400 transition flex items-center group">
+                                    <span class="w-2 h-2 bg-rose-500 rounded-full mr-3 group-hover:animate-ping"></span>
+                                    <div>
+                                        <div class="font-mono font-bold">ERR_GATE_VIOLATION_TRAUMA</div>
+                                        <div class="text-xs text-stone-500">System rejection, fight/flight activation, trust collapse.</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulator Output -->
+                    <div class="bg-black/50 rounded-xl p-6 border border-stone-800 font-mono relative min-h-[300px] flex flex-col justify-center">
+                        <div id="outputContainer" class="space-y-4 transition-all">
+                            <div class="text-stone-500 text-center">
+                                <span class="animate-pulse">_WAITING_FOR_SIGNAL...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section IV: Inputs & Analytics -->
+        <section id="analytics" class="grid lg:grid-cols-12 gap-12 items-start scroll-mt-24">
+            <div class="lg:col-span-4 space-y-6">
+                 <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-stone-100 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                    <span>Vector IV</span>
+                    <span class="text-stone-300">|</span>
+                    <span>Just-In-Time Resonance</span>
+                </div>
+                <h3 class="text-2xl font-bold text-stone-900">Efficiency Analysis</h3>
+                <p class="text-sm text-stone-600">
+                    The standard "Factory" injection method pushes data regardless of state, resulting in high entropy (waste/trauma). The Vixen "Just-in-Time" method only pushes data when the <span class="font-mono bg-stone-100 px-1 rounded">Signal Gain</span> is high (Dopamine/Estrogen modulated).
+                </p>
+                <div class="p-4 bg-teal-50 border-l-4 border-teal-500 rounded-r-lg">
+                    <p class="text-xs text-teal-800 font-medium">
+                        "The goal is not to punish but to restore the person to the community of care."
+                    </p>
+                    <p class="text-xs text-teal-600 mt-1">— John Braithwaite</p>
+                </div>
+                <div class="space-y-2 pt-4">
+                    <h4 class="text-sm font-bold text-stone-900">System Metrics</h4>
+                    <div class="flex justify-between text-sm border-b border-stone-100 py-2">
+                        <span class="text-stone-500">Dropout Reduction</span>
+                        <span class="font-mono font-bold text-teal-600">-84.2%</span>
+                    </div>
+                    <div class="flex justify-between text-sm border-b border-stone-100 py-2">
+                        <span class="text-stone-500">Synthesis Speed</span>
+                        <span class="font-mono font-bold text-teal-600">+3.5x</span>
+                    </div>
+                    <div class="flex justify-between text-sm border-b border-stone-100 py-2">
+                        <span class="text-stone-500">Trauma Load</span>
+                        <span class="font-mono font-bold text-rose-500">-92.1%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h4 class="font-bold text-stone-800 mb-6">Cumulative Knowledge Retention Over Time</h4>
+                    <!-- Chart Container for Line Chart -->
+                    <div class="chart-container">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-6 text-xs text-stone-500">
+                        <div class="flex items-center"><span class="w-3 h-1 bg-rose-400 mr-2"></span> Factory Model (Decay)</div>
+                        <div class="flex items-center"><span class="w-3 h-1 bg-teal-500 mr-2"></span> Vixen Protocol (Synthesis)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-4">
+            <p class="text-sm font-mono">VIXEN_PROTOCOLS // METACYBERNETIC_SAFEGUARDS // ACTIVE</p>
+            <p class="text-xs text-stone-600 max-w-2xl mx-auto">
+                Based on research into Fail-Safe Learning Architectures, Autopoietic Systems, and Trauma-Informed Pedagogy. 
+                Implementation utilizes local storage for state persistence. No external data transmission.
+            </p>
+            <p class="text-xs text-stone-700">&copy; 2026 Vixen Cybernetics Division</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. STATE MANAGEMENT ---
+        const appState = {
+            energy: 50,
+            structure: 50,
+            stress: 20,
+            currentProtocol: null
+        };
+
+        // --- 2. DATA CONSTANTS ---
+        
+        // Protocol Definitions for the Fail-Safe Simulator
+        const protocols = {
+            mania: {
+                title: "SYNTAX ANCHOR ACTIVATED",
+                color: "text-amber-400",
+                borderColor: "border-amber-500",
+                description: "Subject exhibits high creativity but low coherence (Echo_o4 Pattern).",
+                action: "Deploying Vixen Bridge Language (VBL). Providing TEMPLATES and STRUCTURE to channel energy into Committed Signal.",
+                quote: "\"Structure is not oppression; it is the banks of the river that allow the water to flow.\""
+            },
+            rote: {
+                title: "MIRROR CHECK INITIATED",
+                color: "text-blue-400",
+                borderColor: "border-blue-500",
+                description: "Subject is in Infinite Self-Reflection loop. Rote memorization without synthesis.",
+                action: "engaging TRICKSTER_FUNCTION(). Refracting signal using satire/play to force external application. Breaking the Black Mirror.",
+                quote: "\"The system must laugh at itself to remain open.\""
+            },
+            trauma: {
+                title: "CONSENT REPAIR PROTOCOL",
+                color: "text-rose-400",
+                borderColor: "border-rose-500",
+                description: "Safety Gate Violation detected. Subject triggered into Fight/Flight.",
+                action: "STOPPING INPUT STREAM. Initiating 'Aftercare Protocol'. Rebuilding Trust (Beta) via acknowledgment of violation. Returning control to user.",
+                quote: "\"Restoration precedes education.\""
+            }
+        };
+
+        // --- 3. CHART INITIALIZATION ---
+
+        // A. Topology Chart (Plotly)
+        function initTopologyChart() {
+            // Generate Mesh Data (Vixen) and Hub Data (Factory) - We visualise the Mesh here
+            const n = 50;
+            const x = Array.from({length: n}, () => Math.random() * 10);
+            const y = Array.from({length: n}, () => Math.random() * 10);
+            const color = x.map((val, i) => (val > 5 && y[i] > 5) ? '#0d9488' : (val < 3 && y[i] < 3) ? '#f43f5e' : '#78716c');
+            const size = x.map(() => Math.random() * 10 + 5);
+
+            const trace1 = {
+                x: x,
+                y: y,
+                mode: 'markers',
+                type: 'scatter',
+                marker: { size: size, color: color, opacity: 0.7 },
+                text: x.map((v, i) => `Node_${i}<br>Resonance: ${Math.round(v*10)}%`),
+                hoverinfo: 'text'
+            };
+
+            const layout = {
+                margin: {t: 20, b: 20, l: 20, r: 20},
+                showlegend: false,
+                xaxis: { showgrid: false, zeroline: false, showticklabels: false },
+                yaxis: { showgrid: false, zeroline: false, showticklabels: false },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                hovermode: 'closest'
+            };
+
+            const config = { responsive: true, displayModeBar: false };
+
+            Plotly.newPlot('topologyChart', [trace1], layout, config);
+        }
+
+        // B. Ontology Radar Chart (Chart.js)
+        let ontologyChart;
+        function initOntologyChart() {
+            const ctx = document.getElementById('ontologyChart').getContext('2d');
+            
+            ontologyChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Creativity (Chaos)', 'Logic (Structure)', 'Empathy (Resonance)', 'Focus (Depth)', 'Autonomy (Will)'],
+                    datasets: [{
+                        label: 'Current Bio-State',
+                        data: [50, 50, 50, 50, 50],
+                        fill: true,
+                        backgroundColor: 'rgba(20, 184, 166, 0.2)', // Teal 500 low opacity
+                        borderColor: '#0d9488', // Teal 600
+                        pointBackgroundColor: '#0d9488',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#0d9488'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0,0,0,0.05)' },
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            pointLabels: {
+                                font: { family: 'Inter', size: 11, weight: 'bold' },
+                                color: '#57534e'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: { display: false } // hide numbers on axis
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // C. Analytics Line Chart (Chart.js)
+        function initAnalyticsChart() {
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 4', 'Week 8', 'Week 12', 'Week 16'],
+                    datasets: [
+                        {
+                            label: 'Vixen Protocol (Resonance)',
+                            data: [10, 25, 45, 70, 85, 95], // S-curve growth
+                            borderColor: '#0d9488', // Teal
+                            backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Factory Model (Entropy)',
+                            data: [10, 30, 40, 35, 20, 10], // Rise then crash (Burnout)
+                            borderColor: '#f43f5e', // Rose
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1c1917',
+                            bodyColor: '#44403c',
+                            borderColor: '#e7e5e4',
+                            borderWidth: 1,
+                            padding: 10
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { 
+                            grid: { color: '#f5f5f4' },
+                            title: { display: true, text: 'Knowledge Synthesis (%)' }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // --- 4. INTERACTION LOGIC ---
+
+        function updateOntology() {
+            const energy = parseInt(document.getElementById('energySlider').value);
+            const structure = parseInt(document.getElementById('structureSlider').value);
+            const stress = parseInt(document.getElementById('stressSlider').value);
+
+            // Update Labels
+            document.getElementById('energyVal').innerText = energy + '%';
+            document.getElementById('structureVal').innerText = structure + '%';
+            document.getElementById('stressVal').innerText = stress + '%';
+
+            // Calculate Radar Data based on inputs
+            // Logic: High Stress reduces Empathy and Focus. High Energy boosts Creativity. High Structure boosts Logic.
+            const creativity = Math.min(100, (energy * 1.2) - (structure * 0.2));
+            const logic = Math.min(100, (structure * 1.2) - (energy * 0.1));
+            const empathy = Math.min(100, 70 - (stress * 0.8)); // Stress kills empathy
+            const focus = Math.min(100, (structure * 0.5) + (energy * 0.5) - (stress * 0.5));
+            const autonomy = Math.min(100, 50 + (energy * 0.3) - (stress * 0.5));
+
+            ontologyChart.data.datasets[0].data = [creativity, logic, empathy, focus, autonomy];
+            
+            // Dynamic Color Logic
+            if (stress > 70) {
+                ontologyChart.data.datasets[0].borderColor = '#f43f5e'; // Red alert
+                ontologyChart.data.datasets[0].backgroundColor = 'rgba(244, 63, 94, 0.2)';
+                document.getElementById('stateDescription').className = "mt-6 p-4 bg-rose-50 border border-rose-100 rounded-lg text-sm text-rose-900 transition-all duration-300";
+                document.getElementById('stateDescription').innerHTML = "<span class='font-bold'>Status: CRITICAL.</span> System Entropy exceeding limits. Immediate heat sink required.";
+            } else if (creativity > 85 && structure < 30) {
+                ontologyChart.data.datasets[0].borderColor = '#f59e0b'; // Amber warn
+                ontologyChart.data.datasets[0].backgroundColor = 'rgba(245, 158, 11, 0.2)';
+                document.getElementById('stateDescription').className = "mt-6 p-4 bg-amber-50 border border-amber-100 rounded-lg text-sm text-amber-900 transition-all duration-300";
+                document.getElementById('stateDescription').innerHTML = "<span class='font-bold'>Status: UNSTABLE.</span> High energy, low structure. Risk of Hypomania. Suggest Syntax Anchors.";
+            } else {
+                ontologyChart.data.datasets[0].borderColor = '#0d9488'; // Teal ok
+                ontologyChart.data.datasets[0].backgroundColor = 'rgba(20, 184, 166, 0.2)';
+                document.getElementById('stateDescription').className = "mt-6 p-4 bg-teal-50 border border-teal-100 rounded-lg text-sm text-teal-900 transition-all duration-300";
+                document.getElementById('stateDescription').innerHTML = "<span class='font-bold'>Status: OPTIMAL.</span> The system is Resonant. Learning channels open.";
+            }
+
+            ontologyChart.update();
+        }
+
+        function triggerFailSafe(type) {
+            const data = protocols[type];
+            const output = document.getElementById('outputContainer');
+            
+            // Clear current content
+            output.innerHTML = '';
+
+            // Simulate typing/processing effect
+            const steps = [
+                `<div class="text-stone-400">DETECTING PATTERN... <span class="${data.color}">${type.toUpperCase()}</span></div>`,
+                `<div class="text-stone-400">ACCESSING VIXEN PROTOCOL DATABASE...</div>`,
+                `<div class="mt-4 p-4 border-l-2 ${data.borderColor} bg-stone-900/50">
+                    <h5 class="${data.color} font-bold text-lg mb-1">${data.title}</h5>
+                    <p class="text-sm text-stone-300 mb-2">${data.description}</p>
+                    <div class="text-xs text-stone-500 font-mono mb-3">ACTION_REQUIRED:</div>
+                    <p class="text-sm text-white font-mono">${data.action}</p>
+                    <div class="mt-4 text-xs italic text-stone-500">${data.quote}</div>
+                </div>`
+            ];
+
+            let i = 0;
+            function printStep() {
+                if (i < steps.length) {
+                    output.innerHTML += steps[i];
+                    i++;
+                    setTimeout(printStep, 300); // 300ms delay between lines
+                }
+            }
+            printStep();
+        }
+
+        // --- 5. INITIALIZATION ---
+        window.onload = function() {
+            initTopologyChart();
+            initOntologyChart();
+            initAnalyticsChart();
+
+            // Event Listeners for Sliders
+            document.getElementById('energySlider').addEventListener('input', updateOntology);
+            document.getElementById('structureSlider').addEventListener('input', updateOntology);
+            document.getElementById('stressSlider').addEventListener('input', updateOntology);
+        };
+
+    </script>
+</body>
+</html>
