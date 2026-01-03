@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Neural Architecture Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Chosen Palette: Warm Neutrals & Academic Tones */
+        :root {
+            --bg-color: #fdfbf7; /* Warm Off-White */
+            --text-main: #2d3748; /* Dark Slate */
+            --accent-soft: #e2e8f0; /* Soft Grey */
+            --highlight-blue: #4299e1;
+            --highlight-green: #48bb78;
+            --highlight-amber: #ecc94b;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        /* Custom scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+        canvas {
+            border-radius: 0.5rem;
+        }
+    </style>
+    <!-- Application Structure Plan: 
+         The application is designed as a "Concept Explorer" dashboard. 
+         Structure:
+         1. Hero Section: Introduces the complex research objective clearly.
+         2. Interactive Architecture Map: A clickable block diagram acting as the primary navigation. This breaks the "L4 Modular Architecture" into digestible components.
+         3. Dynamic Simulation Modules: 
+            - Hexagonal Phase Coding: Visualizes the spatial grid logic.
+            - Kuramoto Synchronization: A real-time physics demo of oscillator syncing.
+            - Spin & Entropy: Abstract visualization of order vs. disorder.
+            - RGB Encoding: A functional tool showing bit-level data hiding.
+         4. Synthesis & Feasibility: Summarizes the mathematical unification.
+         
+         Reasoning: The source report is highly theoretical and dense. A linear text format would be overwhelming. 
+         This interactive dashboard allows users to "play" with the physics concepts (Oscillators, Spins, Grids) individually 
+         before seeing how they connect, fostering intuitive understanding of the proposed unified framework.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Hex Grid: Goal -> Explain Spatial Coding. Method -> HTML5 Canvas drawing. Interaction -> Hover to see phase gradients. Justification -> Static images fail to convey the "travelling wave" aspect of phase coding.
+         2. Kuramoto Model: Goal -> Demonstrate Sync. Method -> Canvas (particles) + Chart.js (Order parameter tracking). Interaction -> Slider for Coupling Constant (K). Justification -> User needs to feel the "snap" of synchronization to understand the memory mechanism.
+         3. Spin/Entropy: Goal -> Explain Negentropy. Method -> Grid of rotating arrows (Canvas). Interaction -> "Temperature/Entropy" slider. Justification -> Visualizing alignment makes "emergent order" concrete.
+         4. RGB Encoding: Goal -> Show LSB mechanism. Method -> HTML/JS Bit visualizer. Interaction -> Text input -> Color change. Justification -> Shows exactly how data is hidden without disrupting the "image" (color).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-gray-800 tracking-tight">Neural<span class="text-blue-600">Architect</span></span>
+                </div>
+                <div class="hidden sm:flex space-x-8 items-center">
+                    <button onclick="scrollToSection('overview')" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Overview</button>
+                    <button onclick="scrollToSection('hex-module')" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Hex Grid</button>
+                    <button onclick="scrollToSection('kuramoto-module')" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Synchronization</button>
+                    <button onclick="scrollToSection('spin-module')" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Spin & Entropy</button>
+                    <button onclick="scrollToSection('encoding-module')" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">RGB Encoding</button>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="flex items-center sm:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <span class="sr-only">Open menu</span>
+                        &#9776; <!-- Unicode hamburger -->
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden sm:hidden bg-white border-t border-gray-100">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <button onclick="scrollToSection('overview')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Overview</button>
+                <button onclick="scrollToSection('hex-module')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hex Grid</button>
+                <button onclick="scrollToSection('kuramoto-module')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Synchronization</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        
+        <!-- Hero / Objective -->
+        <section id="overview" class="py-12 bg-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+                    Unifying Phase Dynamics & Neural Architectures
+                </h1>
+                <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                    A comprehensive investigation into a hybrid architecture integrating Hexagonal Grids, Kuramoto Oscillators, Spin Physics, and RGB LSB Encoding for synthetic cognitive systems.
+                </p>
+                
+                <!-- Architecture Concept Map -->
+                <div class="mt-10 bg-gray-50 rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Interactive System Architecture (Layered L4)</h3>
+                    <p class="text-sm text-gray-500 mb-6">Click a component to jump to its detailed analysis.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div onclick="scrollToSection('hex-module')" class="cursor-pointer bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all group">
+                            <div class="text-blue-500 text-2xl mb-2">&#11042;</div> <!-- Hexagon symbol -->
+                            <h4 class="font-bold text-gray-800 group-hover:text-blue-600">Hexagonal Grid</h4>
+                            <p class="text-xs text-gray-500 mt-1">Spatial navigation & phase coding via interference patterns.</p>
+                        </div>
+                        
+                        <div onclick="scrollToSection('kuramoto-module')" class="cursor-pointer bg-white p-4 rounded-lg border border-gray-200 hover:border-green-400 hover:shadow-md transition-all group">
+                            <div class="text-green-500 text-2xl mb-2">&#9679;</div> <!-- Circle symbol -->
+                            <h4 class="font-bold text-gray-800 group-hover:text-green-600">Kuramoto Sync</h4>
+                            <p class="text-xs text-gray-500 mt-1">Global phase synchronization for memory stabilization.</p>
+                        </div>
+
+                        <div onclick="scrollToSection('spin-module')" class="cursor-pointer bg-white p-4 rounded-lg border border-gray-200 hover:border-amber-400 hover:shadow-md transition-all group">
+                            <div class="text-amber-500 text-2xl mb-2">&#8635;</div> <!-- Spiral/Spin symbol -->
+                            <h4 class="font-bold text-gray-800 group-hover:text-amber-600">Spin & Negentropy</h4>
+                            <p class="text-xs text-gray-500 mt-1">Topological transport & emergent order via spin alignment.</p>
+                        </div>
+
+                        <div onclick="scrollToSection('encoding-module')" class="cursor-pointer bg-white p-4 rounded-lg border border-gray-200 hover:border-purple-400 hover:shadow-md transition-all group">
+                            <div class="text-purple-500 text-2xl mb-2">&#9638;</div> <!-- Grid/Storage symbol -->
+                            <h4 class="font-bold text-gray-800 group-hover:text-purple-600">RGB LSB Encoding</h4>
+                            <p class="text-xs text-gray-500 mt-1">Steganographic state persistence in 3-channel memory.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 1: Hexagonal Grid -->
+        <section id="hex-module" class="py-12 bg-gray-50 border-t border-gray-200">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                            <span class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">1</span>
+                            Hexagonal Phase Coding
+                        </h2>
+                        <p class="text-gray-600 mb-4 leading-relaxed">
+                            Entorhinal grid cells represent space using a hexagonal lattice. Unlike Cartesian coordinates, this system uses <strong>phase offsets</strong> and <strong>interference patterns</strong>.
+                        </p>
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">&#10003;</span>
+                                <span class="text-sm text-gray-700"><strong>Research Question:</strong> How are traveling waves represented on hex lattices?</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">&#10003;</span>
+                                <span class="text-sm text-gray-700"><strong>Mechanism:</strong> Navigation gradients emerge from phase shifts across the lattice nodes.</span>
+                            </li>
+                        </ul>
+                        <div class="bg-white p-4 rounded-lg border-l-4 border-blue-500 shadow-sm">
+                            <h4 class="font-semibold text-gray-800 text-sm mb-1">Interactive Simulation</h4>
+                            <p class="text-xs text-gray-500">The canvas on the right visualizes a hexagonal grid. Move your mouse to simulate a "Phase Packet" traveling through the neural lattice.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:w-1/2 w-full">
+                        <div class="chart-container bg-white shadow-md rounded-lg p-2">
+                            <canvas id="hexCanvas"></canvas>
+                        </div>
+                        <p class="text-center text-xs text-gray-400 mt-2">Figure 1.1: Hexagonal Lattice Phase Propagation</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 2: Kuramoto Synchronization -->
+        <section id="kuramoto-module" class="py-12 bg-white border-t border-gray-200">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">2</span>
+                    Kuramoto Oscillator Synchronization
+                </h2>
+                <p class="text-gray-600 mb-8 max-w-3xl">
+                    The Kuramoto model describes how independent oscillators can spontaneously synchronize. In this architecture, this mechanism serves as the <strong>memory stabilization force</strong>. When phases align (Global Phase Coherence), information is "locked" into the network.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Controls -->
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-4">Simulation Controls</h3>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Coupling Constant (K): <span id="kValueDisplay" class="font-mono text-green-600">0.5</span></label>
+                            <input type="range" id="couplingSlider" min="0" max="5" step="0.1" value="0.5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Chaos (K=0)</span>
+                                <span>Sync (K>Kc)</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600"><strong>Order Parameter (r):</strong> <span id="rValueDisplay" class="font-bold text-gray-900">0.00</span></p>
+                            <p class="text-xs text-gray-500 mt-1">r = 0 (Total Disorder)</p>
+                            <p class="text-xs text-gray-500">r = 1 (Perfect Sync)</p>
+                        </div>
+
+                        <button id="resetKuramoto" class="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 rounded shadow-sm transition-colors text-sm">
+                            Reset Simulation
+                        </button>
+                    </div>
+
+                    <!-- Visualizer -->
+                    <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="chart-container bg-white border border-gray-200 shadow-sm rounded-lg p-1">
+                            <canvas id="oscillatorCanvas"></canvas>
+                        </div>
+                        <div class="chart-container bg-white border border-gray-200 shadow-sm rounded-lg p-2">
+                            <canvas id="coherenceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 3: Spin & Entropy -->
+        <section id="spin-module" class="py-12 bg-gray-50 border-t border-gray-200">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row-reverse gap-12 items-center">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                            <span class="bg-amber-100 text-amber-600 rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">3</span>
+                            Spin Physics & Negentropy
+                        </h2>
+                        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                            <strong>Negentropy (Negative Entropy)</strong> drives the system towards order. By coupling oscillator phases to spin states (Ising/Heisenberg models), the system minimizes energy by aligning spins, creating stable "helical" carriers of information that resist noise.
+                        </p>
+                        
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-4">Thermodynamic Control</h4>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">System Temperature (Noise):</label>
+                            <input type="range" id="tempSlider" min="0" max="100" value="80" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>Absolute Zero (Perfect Order)</span>
+                                <span>High Temp (Random)</span>
+                            </div>
+                            <p class="mt-4 text-xs text-gray-500">
+                                <em>Observation:</em> Lowering temperature increases Negentropy, causing the spins (arrows) to align into domains or a uniform field.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:w-1/2 w-full">
+                        <div class="chart-container bg-white shadow-md rounded-lg p-2">
+                            <canvas id="spinCanvas"></canvas>
+                        </div>
+                        <p class="text-center text-xs text-gray-400 mt-2">Figure 3.1: 2D Spin Lattice Alignment</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 4: Encoding -->
+        <section id="encoding-module" class="py-12 bg-white border-t border-gray-200">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span class="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">4</span>
+                    MRP LSB RGB Encoding
+                </h2>
+                <p class="text-gray-600 mb-8 max-w-3xl">
+                    Least Significant Bit (LSB) steganography uses the "noise" floor of RGB channels to store state data. In this architecture, phase memory is encoded into the color channels of the neural representation.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Interactive Encoder -->
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-4">Channel Data Injector</h3>
+                        
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Base Color Signal (RGB)</label>
+                            <div class="flex space-x-2">
+                                <div class="w-full bg-red-100 p-2 rounded text-center text-red-800 font-mono text-sm border border-red-200">R: 200</div>
+                                <div class="w-full bg-green-100 p-2 rounded text-center text-green-800 font-mono text-sm border border-green-200">G: 100</div>
+                                <div class="w-full bg-blue-100 p-2 rounded text-center text-blue-800 font-mono text-sm border border-blue-200">B: 050</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Data to Encode (Text)</label>
+                            <input type="text" id="lsbInput" placeholder="Type 'Memory'..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        </div>
+
+                        <button id="encodeBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded w-full transition-colors">
+                            Encode into LSB
+                        </button>
+                    </div>
+
+                    <!-- Results View -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <h3 class="font-bold text-gray-800 mb-4">Encoded Signal Analysis</h3>
+                        <div id="encodingResult" class="space-y-4 opacity-50">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-sm text-gray-600">Original Binary (Red Channel)</span>
+                                <span class="font-mono text-xs text-gray-400">11001000</span>
+                            </div>
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-sm text-purple-600 font-semibold">Modified Binary (w/ Data)</span>
+                                <span class="font-mono text-xs text-purple-600" id="modBinary">11001001</span>
+                            </div>
+                            <div class="p-3 bg-purple-50 rounded text-xs text-purple-800 mt-2">
+                                Status: <span id="encodeStatus">Waiting for input...</span>
+                            </div>
+                            <div class="text-xs text-gray-500 italic mt-2">
+                                Note: The color change is imperceptible to the human eye (and standard noise filters), preserving the carrier signal's integrity.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 5: Synthesis -->
+        <section class="py-12 bg-gray-900 text-white">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-bold mb-8 text-center">Mathematical Unification Synthesis</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-300 mb-3">Proposed Core Equation Set</h3>
+                        <div class="bg-gray-800 p-5 rounded-lg font-mono text-sm leading-loose shadow-inner border border-gray-700">
+                            <p class="mb-2"><span class="text-gray-400"># Kuramoto on Hex Lattice</span><br>
+                            dθ_i/dt = ω_i + (K/N) ∑ A_ij sin(θ_j - θ_i)</p>
+                            
+                            <p class="mb-2"><span class="text-gray-400"># Helical Field (Spin Wave)</span><br>
+                            ∂ψ/∂t = iJ ∇²ψ - S(r) × ψ</p>
+                            
+                            <p class="mb-2"><span class="text-gray-400"># Negentropy Maximization</span><br>
+                            max H_neg = -∑ p(x) log p(x) - S_thermal</p>
+                            
+                            <p><span class="text-gray-400"># MRP State Vector</span><br>
+                            V_state = [R_lsb, G_lsb, B_lsb] ⊗ Φ_phase</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-300 mb-3">Feasibility Assessment</h3>
+                        <ul class="space-y-4 text-sm text-gray-300">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">●</span>
+                                <span><strong>High Feasibility:</strong> Mapping Kuramoto models to Hexagonal Grid layouts is mathematically consistent with existing "Small-World" network theories.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-amber-500 mr-2">●</span>
+                                <span><strong>Speculative Leap:</strong> Coupling Spin dynamics (Quantum/Magnonic scale) directly to Neural Oscillators (Macro scale) requires a simplified "Effective Field Theory" rather than direct physical implementation.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">●</span>
+                                <span><strong>Implementation:</strong> The LSB encoding is a robust, proven method for digital state persistence, serving as an effective "cache" layer in the L4 architecture.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 border-t border-gray-200 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-sm text-gray-500 mb-4 md:mb-0">
+                &copy; 2024 Research Proposal Synthesis. Generated for Cognitive Systems Analysis.
+            </div>
+            <div class="flex space-x-6 text-sm text-gray-400">
+                <span>Phase Dynamics</span>
+                <span>Topological Transport</span>
+                <span>Steganography</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Navigation Logic ---
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if(!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Module 1: Hexagonal Grid Canvas ---
+        const initHexGrid = () => {
+            const canvas = document.getElementById('hexCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+
+            // Resize handling
+            const resize = () => {
+                const parent = canvas.parentElement;
+                width = parent.clientWidth;
+                height = parent.clientHeight;
+                canvas.width = width;
+                canvas.height = height;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Hexagon Math
+            const a = 2 * Math.PI / 6;
+            const r = 20; // Radius
+            
+            // Mouse interaction for "Phase Wave"
+            let mouseX = -100, mouseY = -100;
+            canvas.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+            });
+
+            function drawHexagon(x, y, color) {
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    ctx.lineTo(x + r * Math.cos(a * i), y + r * Math.sin(a * i));
+                }
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = "#e2e8f0";
+                ctx.stroke();
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                
+                // Grid Logic (offset rows)
+                const yStep = r * Math.sin(a) * 3; // Approx vertical distance
+                const xStep = r * (1 + Math.cos(a));
+                
+                for (let y = 0; y < height + r; y += Math.sin(a)*r*1.8) {
+                    for (let x = 0, j = 0; x < width + r; x += r * 3, j++) {
+                        let xPos = x;
+                        let yPos = y;
+                        if(Math.floor(y / (Math.sin(a)*r*1.8)) % 2 !== 0) {
+                            xPos += r * 1.5;
+                        }
+
+                        // Calculate distance to mouse for "Phase Activation"
+                        const dist = Math.hypot(xPos - mouseX, yPos - mouseY);
+                        let color = "#ffffff";
+                        
+                        // Simulation of Wave Packet passing through grid
+                        if (dist < 80) {
+                            // High activation (Blue)
+                            const intensity = 1 - (dist/80);
+                            color = `rgba(66, 153, 225, ${intensity})`;
+                        } else if (dist < 150) {
+                            // Ripple
+                            color = `rgba(66, 153, 225, 0.1)`;
+                        }
+
+                        drawHexagon(xPos, yPos, color);
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        };
+
+        // --- Module 2: Kuramoto Synchronization ---
+        const initKuramoto = () => {
+            // 1. Oscillator Canvas
+            const oscCanvas = document.getElementById('oscillatorCanvas');
+            const ctx = oscCanvas.getContext('2d');
+            let oscWidth, oscHeight;
+            
+            const resizeOsc = () => {
+                const parent = oscCanvas.parentElement;
+                oscWidth = parent.clientWidth;
+                oscHeight = parent.clientHeight;
+                oscCanvas.width = oscWidth;
+                oscCanvas.height = oscHeight;
+            };
+            window.addEventListener('resize', resizeOsc);
+            resizeOsc();
+
+            // 2. Chart.js for Order Parameter (r)
+            const chartCtx = document.getElementById('coherenceChart').getContext('2d');
+            const coherenceChart = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: Array(50).fill(''), // 50 time steps history
+                    datasets: [{
+                        label: 'Global Coherence (r)',
+                        data: Array(50).fill(0),
+                        borderColor: '#48bb78', // Green
+                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        pointRadius: 0,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false, // Performance
+                    scales: {
+                        y: { min: 0, max: 1.1, title: { display: true, text: 'Coherence (0-1)' } },
+                        x: { display: false }
+                    },
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+
+            // Physics Variables
+            const N = 50; // Number of oscillators
+            const oscillators = [];
+            let K = 0.5; // Coupling constant
+            
+            // Initialize Oscillators
+            for(let i=0; i<N; i++) {
+                oscillators.push({
+                    phase: Math.random() * 2 * Math.PI,
+                    freq: 1 + (Math.random() - 0.5) * 0.5, // Natural frequency distribution centered on 1
+                    color: `hsl(${Math.random()*360}, 70%, 50%)`
+                });
+            }
+
+            // Controls
+            const kSlider = document.getElementById('couplingSlider');
+            const kDisplay = document.getElementById('kValueDisplay');
+            const rDisplay = document.getElementById('rValueDisplay');
+            const resetBtn = document.getElementById('resetKuramoto');
+
+            kSlider.addEventListener('input', (e) => {
+                K = parseFloat(e.target.value);
+                kDisplay.textContent = K.toFixed(1);
+            });
+
+            resetBtn.addEventListener('click', () => {
+                oscillators.forEach(osc => osc.phase = Math.random() * 2 * Math.PI);
+                coherenceChart.data.datasets[0].data = Array(50).fill(0);
+                coherenceChart.update();
+            });
+
+            // Physics Loop
+            const dt = 0.05;
+            function updatePhysics() {
+                // Calculate Order Parameter (r) and Mean Phase (Psi)
+                // z = r * e^(i*Psi) = (1/N) * sum(e^(i*theta_j))
+                let sumSin = 0;
+                let sumCos = 0;
+                
+                oscillators.forEach(osc => {
+                    sumSin += Math.sin(osc.phase);
+                    sumCos += Math.cos(osc.phase);
+                });
+                
+                const r = Math.sqrt(sumSin*sumSin + sumCos*sumCos) / N;
+                const psi = Math.atan2(sumSin, sumCos);
+
+                // Update Chart UI
+                rDisplay.textContent = r.toFixed(2);
+                
+                // Update Chart Data (Shift buffer)
+                const data = coherenceChart.data.datasets[0].data;
+                data.shift();
+                data.push(r);
+                if(Math.random() > 0.8) coherenceChart.update(); // Throttle UI updates
+
+                // Update Phases
+                oscillators.forEach(osc => {
+                    // dTheta/dt = w_i + K * r * sin(Psi - theta_i) -- Mean Field Approximation
+                    const dTheta = osc.freq + K * r * Math.sin(psi - osc.phase);
+                    osc.phase += dTheta * dt;
+                    
+                    // Normalize
+                    if(osc.phase > 2*Math.PI) osc.phase -= 2*Math.PI;
+                    if(osc.phase < 0) osc.phase += 2*Math.PI;
+                });
+
+                drawOscillators(r);
+                requestAnimationFrame(updatePhysics);
+            }
+
+            function drawOscillators(r) {
+                // Draw circle layout
+                ctx.clearRect(0,0, oscWidth, oscHeight);
+                const centerX = oscWidth/2;
+                const centerY = oscHeight/2;
+                const radius = Math.min(centerX, centerY) * 0.7;
+
+                // Draw Track
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2*Math.PI);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw Sync Indicator Center
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius * r, 0, 2*Math.PI); // Radius grows with sync
+                ctx.fillStyle = `rgba(72, 187, 120, 0.2)`;
+                ctx.fill();
+
+                // Draw Particles
+                oscillators.forEach(osc => {
+                    const x = centerX + radius * Math.cos(osc.phase);
+                    const y = centerY + radius * Math.sin(osc.phase);
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, 2*Math.PI);
+                    ctx.fillStyle = r > 0.8 ? '#48bb78' : '#a0aec0'; // Turn green if synced
+                    ctx.fill();
+                });
+            }
+
+            updatePhysics();
+        };
+
+        // --- Module 3: Spin Physics Canvas ---
+        const initSpin = () => {
+            const canvas = document.getElementById('spinCanvas');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            const resize = () => {
+                const p = canvas.parentElement;
+                w = p.clientWidth;
+                h = p.clientHeight;
+                canvas.width = w;
+                canvas.height = h;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Grid of spins
+            const gridSize = 10;
+            const cols = 15;
+            const rows = 10;
+            let spins = [];
+
+            // Initialize random spins (angle in radians)
+            for(let i=0; i<cols*rows; i++) spins.push(Math.random() * 2 * Math.PI);
+
+            const tempSlider = document.getElementById('tempSlider');
+            let temperature = 80;
+
+            tempSlider.addEventListener('input', (e) => {
+                temperature = parseInt(e.target.value);
+            });
+
+            function drawArrow(x, y, angle, color) {
+                const len = 12;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.beginPath();
+                ctx.moveTo(-len/2, 0);
+                ctx.lineTo(len/2, 0);
+                ctx.lineTo(len/6, -len/4);
+                ctx.moveTo(len/2, 0);
+                ctx.lineTo(len/6, len/4);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function updateSpins() {
+                // Ising-like Logic: Align with neighbors based on Temperature
+                // Low Temp -> Strong alignment. High Temp -> Random noise.
+                
+                const newSpins = [...spins];
+                const noiseFactor = temperature / 100; // 0 to 1
+
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const idx = r * cols + c;
+                        
+                        // Get Average Neighbor Angle
+                        let sumSin = 0, sumCos = 0, count = 0;
+                        
+                        // Check neighbors (simplified, no wrapping)
+                        const neighbors = [idx-1, idx+1, idx-cols, idx+cols];
+                        neighbors.forEach(n => {
+                            if(n >= 0 && n < spins.length) {
+                                sumSin += Math.sin(spins[n]);
+                                sumCos += Math.cos(spins[n]);
+                                count++;
+                            }
+                        });
+
+                        const avgAngle = Math.atan2(sumSin/count, sumCos/count);
+
+                        // Update Rule: Blend current angle, neighbor average, and random noise
+                        // If Temp is high, random dominates. If low, neighbor dominates.
+                        
+                        if (Math.random() < 0.1) { // Stochastic update
+                            const randomAngle = Math.random() * 2 * Math.PI;
+                            if (Math.random() < noiseFactor) {
+                                newSpins[idx] = randomAngle; // Thermal flip
+                            } else {
+                                // Align
+                                // Simple easing towards average
+                                let diff = avgAngle - spins[idx];
+                                // Normalize diff
+                                if (diff > Math.PI) diff -= 2*Math.PI;
+                                if (diff < -Math.PI) diff += 2*Math.PI;
+                                
+                                newSpins[idx] += diff * 0.2; // Move 20% towards neighbor
+                            }
+                        }
+                    }
+                }
+                spins = newSpins;
+            }
+
+            function animate() {
+                ctx.clearRect(0,0,w,h);
+                
+                // Draw Grid
+                const xSpace = w / (cols + 1);
+                const ySpace = h / (rows + 1);
+
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const idx = r * cols + c;
+                        const x = xSpace * (c + 1);
+                        const y = ySpace * (r + 1);
+                        
+                        // Color based on alignment (let's say 0 is "Red", PI is "Blue")
+                        // Visualization of magnetic domains
+                        const val = Math.sin(spins[idx]); // -1 to 1
+                        const color = val > 0 ? `rgba(236, 201, 75, ${0.5 + val/2})` : `rgba(66, 153, 225, ${0.5 + Math.abs(val)/2})`;
+                        
+                        drawArrow(x, y, spins[idx], color);
+                    }
+                }
+
+                updateSpins();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        };
+
+        // --- Module 4: Encoding Logic ---
+        const initEncoding = () => {
+            const btn = document.getElementById('encodeBtn');
+            const input = document.getElementById('lsbInput');
+            const status = document.getElementById('encodeStatus');
+            const modBinary = document.getElementById('modBinary');
+            const resultDiv = document.getElementById('encodingResult');
+
+            btn.addEventListener('click', () => {
+                const text = input.value;
+                if (!text) return;
+
+                // Simulate processing
+                status.textContent = "Processing channels...";
+                status.className = "text-amber-600 font-semibold";
+                resultDiv.classList.remove('opacity-50');
+
+                setTimeout(() => {
+                    // Just a visual simulation of the concept
+                    // 200 in binary is 11001000
+                    // We flip the last bit
+                    const original = "11001000";
+                    let modified = original.substring(0, 7) + (original[7] === '0' ? '1' : '0');
+                    
+                    modBinary.textContent = modified;
+                    status.innerHTML = `Encoded <span class="font-mono bg-gray-100 px-1 rounded">${text.length * 8} bits</span> into RGB LSBs. State Persisted.`;
+                    status.className = "text-green-600 font-bold";
+                    
+                    // Flash effect
+                    modBinary.classList.add('bg-yellow-200');
+                    setTimeout(() => modBinary.classList.remove('bg-yellow-200'), 500);
+                }, 600);
+            });
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initHexGrid();
+            initKuramoto();
+            initSpin();
+            initEncoding();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystal Garden: Layer 1 Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a8a29e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #78716c;
+        }
+
+        /* Chart Container Strict Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 2px;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone) + Deep Indigo/Teal for Tech accents. Minimalistic and organic. -->
+    <!-- Application Structure Plan:
+         1. Header: Context setting (Vixen Cybernetics).
+         2. Overview: The Core Theory (Text + Iconography).
+         3. Interactive Module A: The Vixen Routing Formula. This is the "Golden Variable". Users simulate network conditions.
+         4. Interactive Module B: Ontological Discovery. Visualizing Signal vs Noise.
+         5. Interactive Module C: The Crystal Ledger. Visualizing the DAG/Vine structure.
+         6. Technical Implementation: Hardware/Software bridge strategy.
+         RATIONALE: Top-down approach from the core mathematical logic (the routing) to the protocol implementation, then storage, then hardware.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Routing: Gauge Chart (Chart.js) to show "Transmission Health". Sliders for variables.
+         2. Discovery: Scatter/Line Chart (Chart.js) to show Signal emerging from Noise.
+         3. Ledger: HTML5 Canvas custom drawing to simulate the "Vine" growth (DAG nodes).
+         4. Hardware: Responsive Grid for Python vs Rust comparison using styled HTML cards.
+         NO SVG. NO Mermaid.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-stone-50/95 backdrop-blur border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl text-indigo-600 font-bold">◈</span>
+                    <span class="font-semibold text-lg tracking-tight text-stone-900">Vixen Cybernetics <span class="text-stone-400 font-normal">| Crystal Garden L1</span></span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <button onclick="scrollToSection('routing')" class="text-stone-600 hover:text-indigo-600 transition-colors text-sm font-medium">Routing Logic</button>
+                    <button onclick="scrollToSection('discovery')" class="text-stone-600 hover:text-indigo-600 transition-colors text-sm font-medium">Ontological Discovery</button>
+                    <button onclick="scrollToSection('ledger')" class="text-stone-600 hover:text-indigo-600 transition-colors text-sm font-medium">Crystal Ledger</button>
+                    <button onclick="scrollToSection('hardware')" class="text-stone-600 hover:text-indigo-600 transition-colors text-sm font-medium">Hardware</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden bg-white border-b border-stone-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+            <div class="text-center max-w-3xl mx-auto">
+                <div class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-indigo-50 text-indigo-700 mb-6 border border-indigo-100">
+                    Confidential • Level 1 Technical Specs
+                </div>
+                <h1 class="text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl mb-6">
+                    The Crystal Garden Architecture
+                </h1>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    A specification for a <strong>Consent-Gated Recursive Feedback</strong> mesh network. 
+                    Unlike standard networks that route based on distance, the Crystal Garden treats data as "excitations" within a field, 
+                    routing purely on <strong>coherence</strong> and <strong>ontological resonance</strong>.
+                </p>
+                <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                    <div class="p-4 bg-stone-50 rounded-lg border border-stone-100">
+                        <div class="text-indigo-600 font-bold text-sm mb-1">Hardware</div>
+                        <div class="text-stone-700 text-sm">Pi Zero "Sidecar" + Android Host</div>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-lg border border-stone-100">
+                        <div class="text-indigo-600 font-bold text-sm mb-1">Topology</div>
+                        <div class="text-stone-700 text-sm">Offline-first Mesh (BLE/LoRa)</div>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-lg border border-stone-100">
+                        <div class="text-indigo-600 font-bold text-sm mb-1">Goal</div>
+                        <div class="text-stone-700 text-sm">Self-healing Digital Organism</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- SECTION 1: ROUTING LOGIC (The Golden Variable) -->
+        <section id="routing" class="scroll-mt-24">
+            <div class="grid lg:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 font-bold text-sm">1</span>
+                        <h2 class="text-2xl font-bold text-stone-900">Consent-Gated Stigmergy</h2>
+                    </div>
+                    
+                    <p class="text-stone-600">
+                        The core differentiator of the Crystal Garden is the <strong>Vixen Formula</strong>. 
+                        The network automatically dampens high-amplification, low-coherence signals (e.g., viral panic) while preserving organic, high-consent information.
+                    </p>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="font-mono text-sm text-stone-500 mb-4 uppercase tracking-wider">The Vixen Formula Simulator</h3>
+                        
+                        <!-- Slider: Consent -->
+                        <div class="mb-6">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-medium text-stone-700">Consent (c<sub>i</sub>)</label>
+                                <span id="val-consent" class="text-sm font-mono text-indigo-600">0.50</span>
+                            </div>
+                            <input type="range" id="input-consent" min="0" max="1" step="0.01" value="0.5">
+                            <div class="text-xs text-stone-400 mt-1">User agreement to propagate signal.</div>
+                        </div>
+
+                        <!-- Slider: Coherence -->
+                        <div class="mb-6">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-medium text-stone-700">Coherence (β<sub>i</sub>)</label>
+                                <span id="val-coherence" class="text-sm font-mono text-indigo-600">0.50</span>
+                            </div>
+                            <input type="range" id="input-coherence" min="0" max="1" step="0.01" value="0.5">
+                            <div class="text-xs text-stone-400 mt-1">Trust resonance between nodes.</div>
+                        </div>
+
+                        <!-- Slider: Entropy -->
+                        <div class="mb-6">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-medium text-stone-700">Network Entropy (H)</label>
+                                <span id="val-entropy" class="text-sm font-mono text-indigo-600">0.70</span>
+                            </div>
+                            <input type="range" id="input-entropy" min="0" max="1" step="0.01" value="0.7">
+                            <div class="text-xs text-stone-400 mt-1">Diversity of neighbors. Optimal ~ 0.70.</div>
+                        </div>
+
+                        <div class="p-4 bg-stone-50 rounded border border-stone-200 mt-4">
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-stone-700">Routing Decision:</span>
+                                <span id="routing-decision" class="font-bold uppercase text-stone-400">WAITING</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col h-full justify-center">
+                    <div class="chart-container bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+                        <canvas id="routingChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <p id="damping-msg" class="text-sm font-medium text-stone-500">
+                            Adjust sliders to test packet viability.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ONTOLOGICAL DISCOVERY -->
+        <section id="discovery" class="scroll-mt-24 border-t border-stone-200 pt-12">
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-teal-100 text-teal-700 font-bold text-sm">2</span>
+                    <h2 class="text-2xl font-bold text-stone-900">Ontological Discovery Protocol</h2>
+                </div>
+                <p class="text-stone-600 max-w-3xl">
+                    Utilizing <strong>Stochastic Resonance</strong>, the beaconing protocol adds noise (random padding/jitter) to mask identity. 
+                    A connection is only formed (Level 3 "Ontological Collapse") when the signal coherence rises above the noise floor via Private Set Intersection (PSI).
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <!-- Concept Card -->
+                <div class="p-5 bg-white rounded-xl shadow-sm border border-stone-200 hover:border-teal-300 transition-colors">
+                    <h3 class="font-bold text-stone-800 mb-2">Level 1: Virtual</h3>
+                    <p class="text-sm text-stone-500">Device appears as background radiation. High noise, no distinct identity.</p>
+                </div>
+                <div class="p-5 bg-white rounded-xl shadow-sm border border-stone-200 hover:border-teal-300 transition-colors">
+                    <h3 class="font-bold text-stone-800 mb-2">Level 2: Resonance</h3>
+                    <p class="text-sm text-stone-500">Bloom Filters detect partial matches in "Interests". Noise begins to align.</p>
+                </div>
+                <div class="p-5 bg-white rounded-xl shadow-sm border border-stone-200 hover:border-teal-300 transition-colors">
+                    <h3 class="font-bold text-stone-800 mb-2">Level 3: Collapse</h3>
+                    <p class="text-sm text-stone-500">Coherence Threshold met. Identity revealed. Secure tunnel established.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                <div class="flex flex-wrap justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg text-stone-800">Signal-to-Noise Simulation</h3>
+                    <button id="btn-add-resonance" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                        Inject Resonance Pulse
+                    </button>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="discoveryChart"></canvas>
+                </div>
+                <div class="mt-4 flex justify-center gap-8 text-sm text-stone-500">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-stone-300 rounded-full"></div>
+                        <span>Background Noise</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-teal-500 rounded-full"></div>
+                        <span>Coherent Signal</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: THE CRYSTAL LEDGER -->
+        <section id="ledger" class="scroll-mt-24 border-t border-stone-200 pt-12">
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="order-2 lg:order-1 bg-stone-900 rounded-xl p-6 shadow-lg overflow-hidden relative">
+                    <div class="absolute top-4 left-4 z-10 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur">
+                        Live DAG Visualization
+                    </div>
+                    <canvas id="ledgerCanvas" class="w-full h-[350px] cursor-crosshair"></canvas>
+                    <div class="mt-4 flex gap-2">
+                        <button id="btn-branch" class="flex-1 bg-stone-700 hover:bg-stone-600 text-white text-xs py-2 rounded transition-colors border border-stone-600">
+                            Branch (Go Offline)
+                        </button>
+                        <button id="btn-merge" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs py-2 rounded transition-colors border border-indigo-500">
+                            Merge (Rejoin)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2 space-y-6">
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 font-bold text-sm">3</span>
+                        <h2 class="text-2xl font-bold text-stone-900">The Crystal Ledger</h2>
+                    </div>
+                    
+                    <p class="text-stone-600">
+                        The ledger is an append-only "Vine" of "Bloom Events". Unlike linear blockchains, it utilizes a <strong>Directed Acyclic Graph (DAG)</strong> structure (similar to IOTA Tangle or Git).
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="border-l-4 border-indigo-500 pl-4 py-1">
+                            <h4 class="font-bold text-stone-800 text-sm">Branching & Merging</h4>
+                            <p class="text-sm text-stone-500 mt-1">
+                                Nodes can disconnect (Branch), accumulate local events, and seamlessly reintegrate (Merge) without conflict.
+                            </p>
+                        </div>
+                        <div class="border-l-4 border-indigo-300 pl-4 py-1">
+                            <h4 class="font-bold text-stone-800 text-sm">Proof-of-Witness</h4>
+                            <p class="text-sm text-stone-500 mt-1">
+                                Instead of Mining (PoW), validation is performed by local AI models witnessing the coherence of neighbor events.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <h4 class="text-sm font-bold text-indigo-900 mb-2">Data Structure Candidate</h4>
+                        <ul class="list-disc list-inside text-sm text-indigo-800 space-y-1">
+                            <li><strong>Structure:</strong> CRDT-based DAG (Conflict-free Replicated Data Type).</li>
+                            <li><strong>Memory:</strong> Bloom Filters for event indexing.</li>
+                            <li><strong>Sync:</strong> Epidemic Protocol (Gossip).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: HARDWARE GLUE -->
+        <section id="hardware" class="scroll-mt-24 border-t border-stone-200 pt-12 pb-12">
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-stone-700 font-bold text-sm">4</span>
+                    <h2 class="text-2xl font-bold text-stone-900">Hardware-Software Interface</h2>
+                </div>
+                <p class="text-stone-600 max-w-3xl">
+                    Running complex entropy calculations and AI witnessing on a Raspberry Pi Zero requires a hybrid architecture. 
+                    We leverage <strong>Rust</strong> for the "Crystal" (Ledger/Networking) and <strong>Python</strong> for the "Mind" (AI/Witnessing).
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Rust Column -->
+                <div class="border border-stone-200 rounded-xl overflow-hidden">
+                    <div class="bg-stone-100 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+                        <h3 class="font-bold text-stone-800">The Crystal (Rust)</h3>
+                        <span class="text-xs bg-stone-200 text-stone-600 px-2 py-1 rounded">Core Logic</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-stone-600">Handles low-level mesh networking, BLE beaconing, and Ledger (DAG) mutations. Ensures memory safety on low-power hardware.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs border border-stone-300 px-2 py-1 rounded text-stone-500">libp2p</span>
+                            <span class="text-xs border border-stone-300 px-2 py-1 rounded text-stone-500">sled (DB)</span>
+                            <span class="text-xs border border-stone-300 px-2 py-1 rounded text-stone-500">tokio</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Python Column -->
+                <div class="border border-stone-200 rounded-xl overflow-hidden">
+                    <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex justify-between items-center">
+                        <h3 class="font-bold text-indigo-900">The Mind (Python)</h3>
+                        <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Intelligence</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-stone-600">Runs PyTorch Lite / TensorFlow Lite models for content classification and "Witnessing" validation. Calculates Entropy (H).</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs border border-indigo-200 bg-indigo-50 px-2 py-1 rounded text-indigo-600">PyO3 Bridge</span>
+                            <span class="text-xs border border-indigo-200 bg-indigo-50 px-2 py-1 rounded text-indigo-600">NumPy</span>
+                            <span class="text-xs border border-indigo-200 bg-indigo-50 px-2 py-1 rounded text-indigo-600">TFLite</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bridge Visual -->
+            <div class="mt-8 bg-stone-800 text-stone-300 rounded-lg p-6 font-mono text-sm shadow-inner">
+                <div class="flex items-center mb-2">
+                    <span class="text-green-400 mr-2">></span> pyo3_bridge_status
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="p-3 border border-stone-600 rounded bg-stone-900">
+                        <div class="text-xs text-stone-500 mb-1">Incoming Packet</div>
+                        <div class="text-white">Rust (Raw Data)</div>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <span class="text-stone-500 text-xs">Shared Memory / FFI</span>
+                        <div class="h-px w-full bg-stone-600 mx-2"></div>
+                        <span class="text-2xl">⚡</span>
+                        <div class="h-px w-full bg-stone-600 mx-2"></div>
+                    </div>
+                    <div class="p-3 border border-stone-600 rounded bg-stone-900">
+                        <div class="text-xs text-stone-500 mb-1">Analysis</div>
+                        <div class="text-white">Python (Entropy Score)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-100 border-t border-stone-200 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-stone-500 text-sm">
+                Vixen Cybernetics Research Division • Project Crystal Garden
+            </p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* -------------------------------------------------------------------------- */
+        /* UTILITIES                                 */
+        /* -------------------------------------------------------------------------- */
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if(el) el.scrollIntoView({behavior: 'smooth'});
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* MODULE 1: ROUTING LOGIC                          */
+        /* -------------------------------------------------------------------------- */
+        const ctxRouting = document.getElementById('routingChart').getContext('2d');
+        
+        // Initial State
+        const routingState = {
+            consent: 0.5,
+            coherence: 0.5,
+            entropy: 0.7
+        };
+
+        // Chart Init
+        const routingChart = new Chart(ctxRouting, {
+            type: 'doughnut',
+            data: {
+                labels: ['Signal Gain', 'Damping Factor'],
+                datasets: [{
+                    data: [50, 50],
+                    backgroundColor: ['#4f46e5', '#e5e7eb'], // Indigo vs Grey
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        // The Center Text Plugin
+        const centerText = {
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                const width = chart.width, height = chart.height, ctx = chart.ctx;
+                ctx.restore();
+                const fontSize = (height / 10).toFixed(2);
+                ctx.font = "bold " + fontSize + "px sans-serif";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#1c1917";
+                
+                // Calculate "Health" Score based on inputs
+                const score = calculateRoutingScore();
+                const text = Math.round(score * 100) + "%";
+                const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                const textY = height / 2;
+                ctx.fillText(text, textX, textY);
+
+                ctx.font = "normal " + (height / 25).toFixed(2) + "px sans-serif";
+                ctx.fillStyle = "#78716c";
+                const label = "Transmissibility";
+                const labelX = Math.round((width - ctx.measureText(label).width) / 2);
+                ctx.fillText(label, labelX, textY + 25);
+                ctx.save();
+            }
+        };
+        Chart.register(centerText);
+
+        // Core Logic: The Vixen Formula Approximation
+        // Goal: H should be close to 0.7. Deviating increases Damping.
+        // Consent (C) and Coherence (B) increase Gain.
+        function calculateRoutingScore() {
+            const { consent, coherence, entropy } = routingState;
+            
+            // Entropy Factor: Optimal is 0.7. 
+            // Distance from 0.7 increases damping.
+            const entropyDist = Math.abs(entropy - 0.7);
+            const entropyPenalty = entropyDist * 2.5; // Weighting the penalty
+            const entropyHealth = Math.max(0, 1 - entropyPenalty);
+
+            // Total Score
+            // Base weight on Consent and Coherence, multiplied by Entropy Health
+            // If Consent is low (<0.3), score crashes regardless of others.
+            if(consent < 0.3) return 0;
+
+            const rawScore = (consent * 0.4) + (coherence * 0.3) + (entropyHealth * 0.3);
+            return Math.min(1, Math.max(0, rawScore));
+        }
+
+        function updateRoutingUI() {
+            const score = calculateRoutingScore();
+            
+            // Update Chart
+            routingChart.data.datasets[0].data = [score * 100, 100 - (score * 100)];
+            if(score > 0.6) {
+                routingChart.data.datasets[0].backgroundColor = ['#10b981', '#e5e7eb']; // Green
+            } else if (score > 0.3) {
+                routingChart.data.datasets[0].backgroundColor = ['#f59e0b', '#e5e7eb']; // Amber
+            } else {
+                routingChart.data.datasets[0].backgroundColor = ['#ef4444', '#e5e7eb']; // Red
+            }
+            routingChart.update();
+
+            // Update Text
+            const decisionEl = document.getElementById('routing-decision');
+            const msgEl = document.getElementById('damping-msg');
+            
+            if(score > 0.75) {
+                decisionEl.innerText = "AMPLIFY";
+                decisionEl.className = "font-bold uppercase text-emerald-600";
+                msgEl.innerText = "High coherence. Signal propagated.";
+            } else if (score > 0.4) {
+                decisionEl.innerText = "DAMPEN";
+                decisionEl.className = "font-bold uppercase text-amber-500";
+                msgEl.innerText = "Moderate resistance. Range limited.";
+            } else {
+                decisionEl.innerText = "BLOCK";
+                decisionEl.className = "font-bold uppercase text-rose-600";
+                msgEl.innerText = "Entropy high or consent low. Signal grounded.";
+            }
+        }
+
+        // Listeners
+        ['consent', 'coherence', 'entropy'].forEach(key => {
+            const el = document.getElementById(`input-${key}`);
+            const disp = document.getElementById(`val-${key}`);
+            el.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                routingState[key] = val;
+                disp.innerText = val.toFixed(2);
+                updateRoutingUI();
+            });
+        });
+
+        // Initial Call
+        updateRoutingUI();
+
+
+        /* -------------------------------------------------------------------------- */
+        /* MODULE 2: DISCOVERY PROTOCOL                        */
+        /* -------------------------------------------------------------------------- */
+        const ctxDiscovery = document.getElementById('discoveryChart').getContext('2d');
+        
+        // Data generation
+        const dataPoints = 50;
+        const labels = Array.from({length: dataPoints}, (_, i) => i);
+        
+        function generateNoise() {
+            return Array.from({length: dataPoints}, () => Math.random() * 0.4 + 0.1);
+        }
+
+        let noiseData = generateNoise();
+        let signalData = new Array(dataPoints).fill(null); // Initially hidden
+
+        const discoveryChart = new Chart(ctxDiscovery, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Background Noise (Virtual)',
+                        data: noiseData,
+                        borderColor: '#d6d3d1', // Stone-300
+                        backgroundColor: 'rgba(214, 211, 209, 0.2)',
+                        borderWidth: 1,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: true
+                    },
+                    {
+                        label: 'Coherent Signal',
+                        data: signalData,
+                        borderColor: '#14b8a6', // Teal-500
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        spanGaps: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1000 },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1,
+                        display: false
+                    },
+                    x: { display: false }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        document.getElementById('btn-add-resonance').addEventListener('click', () => {
+            // Simulate Stochastic Resonance: Signal emerges from noise
+            const newData = [];
+            for(let i=0; i<dataPoints; i++) {
+                // Create a "pulse" in the middle
+                const x = i - dataPoints/2;
+                const bell = Math.exp(-(x*x)/(2*20)); // Bell curve
+                newData.push(bell * 0.8 + (Math.random() * 0.1));
+            }
+            
+            discoveryChart.data.datasets[1].data = newData;
+            
+            // Reduce noise where signal is strong (visual effect of coherence)
+            const newNoise = noiseData.map((n, i) => {
+                return newData[i] > 0.4 ? n * 0.2 : n; 
+            });
+            discoveryChart.data.datasets[0].data = newNoise;
+            
+            discoveryChart.update();
+
+            setTimeout(() => {
+                // Reset after 3 seconds to show ephemeral nature
+                discoveryChart.data.datasets[1].data = new Array(dataPoints).fill(null);
+                discoveryChart.data.datasets[0].data = generateNoise();
+                discoveryChart.update();
+            }, 3000);
+        });
+
+
+        /* -------------------------------------------------------------------------- */
+        /* MODULE 3: CRYSTAL LEDGER                          */
+        /* -------------------------------------------------------------------------- */
+        const canvas = document.getElementById('ledgerCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        // Resize handler
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            width = canvas.width;
+            height = canvas.height;
+            drawDAG();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // DAG Data Structure
+        let nodes = [];
+        let connections = [];
+        let nodeIdCounter = 0;
+
+        class Node {
+            constructor(x, y, isBranch = false) {
+                this.id = nodeIdCounter++;
+                this.x = x;
+                this.y = y;
+                this.isBranch = isBranch;
+                this.radius = isBranch ? 4 : 6;
+                this.color = isBranch ? '#a8a29e' : '#4f46e5'; // Stone vs Indigo
+            }
+        }
+
+        // Initialize with a simple chain
+        function initDAG() {
+            nodes = [];
+            connections = [];
+            let startY = 175; // Middle approx
+            // Create genesis
+            nodes.push(new Node(50, startY));
+            nodes.push(new Node(100, startY));
+            connections.push([0, 1]);
+            nodes.push(new Node(150, startY));
+            connections.push([1, 2]);
+        }
+
+        function drawDAG() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw connections
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 2;
+            connections.forEach(([sourceId, targetId]) => {
+                const source = nodes.find(n => n.id === sourceId);
+                const target = nodes.find(n => n.id === targetId);
+                if(source && target) {
+                    ctx.beginPath();
+                    ctx.moveTo(source.x, source.y);
+                    ctx.lineTo(target.x, target.y);
+                    ctx.stroke();
+                }
+            });
+
+            // Draw nodes
+            nodes.forEach(node => {
+                ctx.fillStyle = node.color;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Glow effect for main chain
+                if(!node.isBranch) {
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "rgba(79, 70, 229, 0.4)";
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+            });
+            ctx.shadowBlur = 0; // Reset
+        }
+
+        // Branch Logic
+        document.getElementById('btn-branch').addEventListener('click', () => {
+            const lastNode = nodes[nodes.length - 1];
+            // Create a branch diverging downwards
+            const newNode = new Node(lastNode.x + 40, lastNode.y + 30, true);
+            nodes.push(newNode);
+            connections.push([lastNode.id, newNode.id]);
+            
+            // Check bounds and shift if needed (simple scroller effect)
+            if(newNode.x > width - 50) {
+                nodes.forEach(n => n.x -= 50);
+            }
+            drawDAG();
+        });
+
+        // Merge Logic
+        document.getElementById('btn-merge').addEventListener('click', () => {
+            const lastNode = nodes[nodes.length - 1];
+            const lastMain = nodes.filter(n => !n.isBranch).pop();
+            
+            // Create a main node that merges the branch and the main chain
+            const newNode = new Node(lastNode.x + 40, 175, false); // Back to center
+            nodes.push(newNode);
+            
+            // Connect to last node (whatever it was)
+            connections.push([lastNode.id, newNode.id]);
+            
+            // If last node was a branch, we also need to connect to the "virtual" main chain continuation
+            // For visual simplicity in this demo, we just connect the last node back to center.
+            // If there's a disjoint main chain, connect it too.
+            if (lastMain && lastMain.id !== lastNode.id) {
+                 connections.push([lastMain.id, newNode.id]);
+            }
+
+             if(newNode.x > width - 50) {
+                nodes.forEach(n => n.x -= 50);
+            }
+            drawDAG();
+        });
+
+        // Init
+        setTimeout(() => {
+            resizeCanvas();
+            initDAG();
+            drawDAG();
+        }, 100);
+
+    </script>
+</body>
+</html>

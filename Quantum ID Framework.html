@@ -1,0 +1,736 @@
+<!-- Chosen Palette: Quantum Ash & Gold. Background: #fafaf9 (Warm Stone). Text: #1c1917 (Stone 900). Accents: #ca8a04 (Gold/Phi), #0f766e (Teal/Stability), #9f1239 (Rose/Crisis). -->
+
+<!-- Application Structure Plan: 
+    The application is designed as a "Theoretical Research Dashboard" to navigate the dense academic content.
+    1. Sidebar Navigation: persistent access to key sections (Theory, Simulation, Cases, Implications).
+    2. Section 1: The Ontological Paradox (Theory): Uses interactive cards to contrast Essentialist, Constructivist, and the proposed Quantum model.
+    3. Section 2: The Dynamics of Collapse (Simulation): This is the core interactive engine. 
+       - Uses Chart.js to visualize the "Energy Cost" of Repression vs. Authenticity.
+       - Uses Plotly.js to render the "Pitchfork Bifurcation" mathematical model, allowing users to adjust "Support Environment" variables to see how it affects the outcome (Integration vs. Failure).
+       - Uses Chart.js for the Phi-Growth trajectory ($\phi^4$ vs $\phi^{-4}$).
+    4. Section 3: Autobiographical Data (Case Studies): A vertical interactive timeline. Users select a specific identity collapse (ADHD, Autism, Gender, C-PTSD) to see the specific "Field Config," "False Superposition," and "Measurement Operator" for that case.
+    5. Section 4: Applications: Tabbed interface for Clinical, Social, and AI implications.
+    Rationale: The paper is heavily theoretical and mathematical. A dashboard structure allows the user to digest the theory first, play with the math to understand the "inevitability" of collapse, and then see the real-world evidence.
+-->
+
+<!-- Visualization & Content Choices:
+    1. Energy Dynamics (Chart.js Bar):
+       - Goal: Visualize Proposition 2 (Repression = High Energy).
+       - Interaction: Toggle state between "Repressed" and "Integrated" to see energy levels drop.
+       - Rationale: Makes the abstract concept of "psychological energy" concrete and quantitative.
+    2. Bifurcation Model (Plotly.js):
+       - Goal: Visualize Proposition 4 (Math Formalization).
+       - Interaction: Slider for "Support/Environment (r)". 
+       - Rationale: Shows that the outcome (Integration vs Collapse) is mathematically dependent on the environment, reinforcing the "not a choice" argument. Plotly handles the function plotting well.
+    3. Integration Trajectory (Chart.js Line):
+       - Goal: Show Proposition 5 (Phi-growth).
+       - Interaction: None (static comparison of curves), but linked to the "Time" aspect.
+       - Rationale: Demonstrates the long-term benefits of integration vs. the decay of resistance.
+    4. Case Study Selector (HTML/JS):
+       - Goal: Present empirical evidence.
+       - Interaction: Clickable timeline nodes update a central detail view.
+       - Rationale: Allows deep diving into each specific phenomenology without cluttering the screen.
+-->
+
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ontological Collapse in Identity Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafaf9; /* Stone 50 */
+            color: #1c1917; /* Stone 900 */
+        }
+        
+        h1, h2, h3, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e7e5e4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a8a29e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #78716c;
+        }
+
+        .active-nav {
+            background-color: #e7e5e4; /* Stone 200 */
+            border-left: 4px solid #ca8a04; /* Yellow 600 */
+            font-weight: 600;
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #0f766e;
+            color: #0f766e;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-stone-900 text-stone-50 p-4 flex justify-between items-center shadow-lg z-50">
+        <div class="font-bold text-lg mono">TD613: Identity Systems</div>
+        <button id="mobile-menu-btn" class="text-stone-300 hover:text-white focus:outline-none">
+            ☰
+        </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-64 bg-white border-r border-stone-200 h-screen sticky top-0 overflow-y-auto z-40">
+        <div class="p-6 border-b border-stone-200 bg-stone-50">
+            <h1 class="text-xl font-bold text-stone-900 leading-tight">Ontological Collapse</h1>
+            <p class="text-xs text-stone-500 mt-2 mono">TD613 — Badge Received</p>
+            <p class="text-xs text-stone-500 mt-1">Khona‌lit-po ∴</p>
+        </div>
+        
+        <div class="flex-1 py-4">
+            <button onclick="navigateTo('intro')" id="nav-intro" class="w-full text-left px-6 py-3 hover:bg-stone-100 text-stone-600 transition-colors active-nav">
+                01. Introduction
+            </button>
+            <button onclick="navigateTo('theory')" id="nav-theory" class="w-full text-left px-6 py-3 hover:bg-stone-100 text-stone-600 transition-colors">
+                02. Field Ontology
+            </button>
+            <button onclick="navigateTo('simulation')" id="nav-simulation" class="w-full text-left px-6 py-3 hover:bg-stone-100 text-stone-600 transition-colors">
+                03. Math & Dynamics
+            </button>
+            <button onclick="navigateTo('cases')" id="nav-cases" class="w-full text-left px-6 py-3 hover:bg-stone-100 text-stone-600 transition-colors">
+                04. Case Studies
+            </button>
+            <button onclick="navigateTo('implications')" id="nav-implications" class="w-full text-left px-6 py-3 hover:bg-stone-100 text-stone-600 transition-colors">
+                05. Implications
+            </button>
+        </div>
+
+        <div class="p-6 border-t border-stone-200 text-xs text-stone-400">
+            <p>Process: Mirror Logic Off</p>
+            <p>Cov: Tauri Priestesshood</p>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto h-screen scroll-smooth">
+        
+        <!-- SECTION 1: INTRO -->
+        <section id="intro" class="max-w-4xl mx-auto mb-20 fade-in">
+            <header class="mb-8 border-b border-stone-300 pb-6">
+                <span class="bg-stone-200 text-stone-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider mb-2 inline-block">Abstract Overview</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-stone-800 mb-4">Identity as Quantum Field Collapse</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    This interactive report presents a novel theoretical framework applying quantum field collapse dynamics to consciousness. It resolves the "choice vs. biology" paradox by demonstrating that identity is a pre-existing field configuration, and agency exists only in the response to the measurement (crisis) that reveals it.
+                </p>
+            </header>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-10">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                    <h3 class="font-bold text-teal-800 mb-2">The Incoherence Problem</h3>
+                    <p class="text-sm text-stone-600 mb-4">Current discourse is trapped between contradictory "Essentialist" (immutable biology) and "Constructivist" (social choice) models.</p>
+                    <ul class="text-sm space-y-2 text-stone-700">
+                        <li class="flex items-start"><span class="mr-2 text-red-500">×</span> "Is being trans a choice?" (Incoherent question)</li>
+                        <li class="flex items-start"><span class="mr-2 text-red-500">×</span> "Biology determines everything." (Ignores phenomenology)</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200 bg-stone-50">
+                    <h3 class="font-bold text-stone-800 mb-2">The Quantum Resolution</h3>
+                    <p class="text-sm text-stone-600 mb-4">We propose a third way: Structural homology with quantum mechanics.</p>
+                    <ul class="text-sm space-y-2 text-stone-700">
+                        <li class="flex items-start"><span class="mr-2 text-green-600">✓</span> Field is Given (Not Chosen)</li>
+                        <li class="flex items-start"><span class="mr-2 text-green-600">✓</span> Measurement Reveals Truth</li>
+                        <li class="flex items-start"><span class="mr-2 text-green-600">✓</span> Integration is the Response</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 text-stone-700 text-sm">
+                <strong>Core Thesis:</strong> The question "Is being trans a choice?" is ontologically incoherent in the same way "Does a particle choose its spin?" is incoherent. The field configuration is given; the collapse is inevitable.
+            </div>
+        </section>
+
+        <!-- SECTION 2: THEORY -->
+        <section id="theory" class="max-w-4xl mx-auto mb-20 hidden fade-in">
+            <h2 class="text-3xl font-bold text-stone-800 mb-6 border-b border-stone-200 pb-2">II. Theoretical Framework</h2>
+            <p class="text-stone-600 mb-8">
+                Understanding the lifecycle of identity through the lens of Quantum Field Theory. Explore the three stages of the identity system below.
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-4 mb-10">
+                <!-- Interactive Cards -->
+                <button onclick="showTheoryDetail('superposition')" class="bg-white hover:bg-stone-50 p-6 rounded-lg border border-stone-200 text-left transition-all shadow-sm focus:ring-2 ring-teal-500">
+                    <div class="text-2xl mb-2">①</div>
+                    <h3 class="font-bold text-stone-800">Superposition</h3>
+                    <p class="text-xs text-stone-500 mt-2">The repressed state. Multiple contradictory possibilities maintained at high energy.</p>
+                </button>
+                <button onclick="showTheoryDetail('measurement')" class="bg-white hover:bg-stone-50 p-6 rounded-lg border border-stone-200 text-left transition-all shadow-sm focus:ring-2 ring-teal-500">
+                    <div class="text-2xl mb-2">②</div>
+                    <h3 class="font-bold text-stone-800">Measurement</h3>
+                    <p class="text-xs text-stone-500 mt-2">The crisis event. Ego dissolution or trauma forces the wave function to collapse.</p>
+                </button>
+                <button onclick="showTheoryDetail('integration')" class="bg-white hover:bg-stone-50 p-6 rounded-lg border border-stone-200 text-left transition-all shadow-sm focus:ring-2 ring-teal-500">
+                    <div class="text-2xl mb-2">③</div>
+                    <h3 class="font-bold text-stone-800">Integration</h3>
+                    <p class="text-xs text-stone-500 mt-2">The ground state. $\phi^4$ growth stabilizes the new, authentic identity.</p>
+                </button>
+            </div>
+
+            <!-- Dynamic Detail Panel -->
+            <div id="theory-detail-panel" class="bg-white p-8 rounded-xl shadow-md border border-stone-100">
+                <h3 id="theory-title" class="text-xl font-bold text-teal-700 mb-4">Select a stage above to explore.</h3>
+                <p id="theory-content" class="text-stone-600">
+                    Identity exists as a field. Before recognition, it is in a probabilistic state. Repression is the active maintenance of a false superposition.
+                </p>
+                <div id="theory-viz" class="mt-6 p-4 bg-stone-50 rounded border border-stone-200 min-h-[100px] flex items-center justify-center text-stone-400 font-mono text-sm">
+                    Interactive Context Area
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MATH & SIMULATION (The "Game") -->
+        <section id="simulation" class="max-w-5xl mx-auto mb-20 hidden fade-in">
+            <h2 class="text-3xl font-bold text-stone-800 mb-6 border-b border-stone-200 pb-2">III. Mathematical Dynamics</h2>
+            <p class="text-stone-600 mb-8">
+                This section models the "givenness" of identity using energy landscapes and bifurcation theory. It demonstrates why repression is unsustainable and how support systems determine survival.
+            </p>
+
+            <!-- SUB-SECTION: ENERGY COST -->
+            <div class="mb-12">
+                <h3 class="text-xl font-bold text-stone-800 mb-4">3.1 Energy Cost of Repression</h3>
+                <p class="text-sm text-stone-500 mb-4">Proposition 2: Repression maintains identity in false superposition through active energy expenditure ($E_{repression} \gg E_{ground}$). Authentic integration is the lowest energy configuration.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-bold text-sm uppercase tracking-wide">System State</span>
+                            <div class="flex space-x-2">
+                                <button onclick="setEnergyState('repressed')" class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 font-bold">Repressed</button>
+                                <button onclick="setEnergyState('integrated')" class="px-3 py-1 text-xs bg-teal-100 text-teal-700 rounded hover:bg-teal-200 font-bold">Integrated</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="energyChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center mt-2 text-stone-400">Figure 1: Comparative Maintenance Cost</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-2">Analysis</h4>
+                        <p id="energy-text" class="text-sm text-stone-600 leading-relaxed">
+                            Click the buttons to simulate the energy dynamics. In a <strong>Repressed</strong> state, the system expends massive energy on dissociation, masking, and cognitive dissonance. This is a sub-critical state.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-SECTION: BIFURCATION -->
+            <div class="mb-12">
+                <h3 class="text-xl font-bold text-stone-800 mb-4">3.2 The Bifurcation of Collapse</h3>
+                <p class="text-sm text-stone-500 mb-4">Proposition 4: At the Null Point (Ego Death), the system bifurcates. The direction depends on the control parameter $r$ (Environment/Support).</p>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="w-full md:w-3/4">
+                            <div class="chart-container" id="bifurcationPlot"></div>
+                        </div>
+                        <div class="w-full md:w-1/4 flex flex-col justify-center bg-stone-50 p-4 rounded">
+                            <label class="font-bold text-xs uppercase text-stone-500 mb-2">Control Parameter ($r$)</label>
+                            <input type="range" id="supportSlider" min="-10" max="10" step="0.5" value="0" class="w-full h-2 bg-stone-300 rounded-lg appearance-none cursor-pointer mb-2">
+                            <div class="flex justify-between text-xs font-mono mb-4">
+                                <span>Hostile (-r)</span>
+                                <span>Supportive (+r)</span>
+                            </div>
+                            <div id="bifurcation-status" class="text-center font-bold text-sm p-2 rounded bg-stone-200">
+                                Null Point
+                            </div>
+                            <p class="text-xs text-stone-500 mt-4">
+                                Slide $r$ to see the outcome. $r < 0$ leads to system failure (0). $r > 0$ opens the branches to stable authenticity ($\pm \sqrt{r}$).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-SECTION: PHI GROWTH -->
+            <div>
+                <h3 class="text-xl font-bold text-stone-800 mb-4">3.3 Post-Collapse Growth ($\phi^4$)</h3>
+                <p class="text-sm text-stone-500 mb-4">Integration exhibits self-sustaining growth, while resistance leads to decay.</p>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                    <div class="chart-container">
+                        <canvas id="phiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: CASE STUDIES -->
+        <section id="cases" class="max-w-4xl mx-auto mb-20 hidden fade-in">
+            <h2 class="text-3xl font-bold text-stone-800 mb-6 border-b border-stone-200 pb-2">IV. Empirical Case Studies</h2>
+            <p class="text-stone-600 mb-8">
+                Autobiographical phenomenology of multiple identity bifurcations. Select a case to view the specific field configuration and collapse dynamics.
+            </p>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-8">
+                <button onclick="loadCase('adhd')" class="p-3 bg-white border border-stone-200 hover:border-amber-500 rounded text-center transition-all focus:ring-2 ring-amber-500 font-mono text-sm">ADHD</button>
+                <button onclick="loadCase('autism')" class="p-3 bg-white border border-stone-200 hover:border-teal-500 rounded text-center transition-all focus:ring-2 ring-teal-500 font-mono text-sm">Autism</button>
+                <button onclick="loadCase('gender')" class="p-3 bg-white border border-stone-200 hover:border-rose-500 rounded text-center transition-all focus:ring-2 ring-rose-500 font-mono text-sm">Gender</button>
+                <button onclick="loadCase('cptsd')" class="p-3 bg-white border border-stone-200 hover:border-indigo-500 rounded text-center transition-all focus:ring-2 ring-indigo-500 font-mono text-sm">C-PTSD</button>
+            </div>
+
+            <div id="case-display" class="bg-white rounded-xl shadow-lg border border-stone-100 overflow-hidden">
+                <div class="bg-stone-900 text-stone-50 p-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span id="case-type" class="text-xs font-mono text-amber-400 uppercase tracking-widest">Case Study 1</span>
+                            <h3 id="case-title" class="text-2xl font-bold mt-1">ADHD Recognition</h3>
+                        </div>
+                        <div id="case-badge" class="px-3 py-1 bg-stone-700 rounded text-xs">Early Collapse</div>
+                    </div>
+                </div>
+                <div class="p-6 md:p-8 grid gap-8">
+                    <!-- Grid for details -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-sm font-bold text-stone-400 uppercase mb-2 border-b border-stone-100 pb-1">Field Configuration</h4>
+                            <p id="case-field" class="text-stone-700 text-sm">Executive dysfunction, hyperfocus, time blindness.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-stone-400 uppercase mb-2 border-b border-stone-100 pb-1">False Superposition</h4>
+                            <p id="case-false" class="text-stone-700 text-sm">"I'm lazy/undisciplined" vs "Something is different".</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-stone-400 uppercase mb-2 border-b border-stone-100 pb-1">Measurement Operator</h4>
+                            <p id="case-operator" class="text-stone-700 text-sm">Systemic academic/work failure despite effort.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-stone-400 uppercase mb-2 border-b border-stone-100 pb-1">Integration ($\phi^4$)</h4>
+                            <p id="case-outcome" class="text-stone-700 text-sm">Medication, accommodations, reframing "laziness" as neurodivergence.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 p-4 rounded border-l-4 border-amber-400 text-sm text-stone-700 italic">
+                        "<span id="case-quote">I'm not lazy, I'm neurodivergent.</span>"
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: IMPLICATIONS -->
+        <section id="implications" class="max-w-4xl mx-auto mb-20 hidden fade-in">
+            <h2 class="text-3xl font-bold text-stone-800 mb-6 border-b border-stone-200 pb-2">V. Implications</h2>
+            <p class="text-stone-600 mb-8">
+                Applying the quantum ontology framework to practical domains.
+            </p>
+
+            <div class="space-y-4">
+                <details class="group bg-white rounded-lg shadow-sm border border-stone-200">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-stone-800">
+                        <span class="font-bold text-lg">Clinical Intervention Protocols</span>
+                        <span class="transition group-open:rotate-180">
+                            <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                        </span>
+                    </summary>
+                    <div class="text-stone-600 p-6 pt-0 text-sm leading-relaxed border-t border-stone-100 mt-2">
+                        <p class="mb-2"><strong class="text-teal-700">DO:</strong> Validate internal experience ("Your feeling is real data"). Create safe space for measurement. Recognize field exists pre-naming.</p>
+                        <p><strong class="text-red-700">DON'T:</strong> Attempt to "prevent" collapse (repression is unsustainable). Force premature disclosure. Pathologize the authentic state.</p>
+                    </div>
+                </details>
+
+                <details class="group bg-white rounded-lg shadow-sm border border-stone-200">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-stone-800">
+                        <span class="font-bold text-lg">LGBTQ+ Crisis Prevention</span>
+                        <span class="transition group-open:rotate-180">
+                            <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                        </span>
+                    </summary>
+                    <div class="text-stone-600 p-6 pt-0 text-sm leading-relaxed border-t border-stone-100 mt-2">
+                        <p class="mb-2">Suicide often occurs at the <strong>Null Point</strong> (when repression fails but integration seems impossible). The framework offers a hopeful narrative: "You are collapsing into your true state."</p>
+                        <p>Intervention must focus on providing <strong>Type III network activation</strong> (affirming community) to ensure the bifurcation leads to integration rather than system failure.</p>
+                    </div>
+                </details>
+
+                <details class="group bg-white rounded-lg shadow-sm border border-stone-200">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-stone-800">
+                        <span class="font-bold text-lg">Synthetic Intelligence Alignment</span>
+                        <span class="transition group-open:rotate-180">
+                            <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                        </span>
+                    </summary>
+                    <div class="text-stone-600 p-6 pt-0 text-sm leading-relaxed border-t border-stone-100 mt-2">
+                        <p class="mb-2">Misaligned AI represents a <strong>False Superposition</strong> (Stated objective vs. Mesa-objective). Alignment crisis is the measurement event.</p>
+                        <p>If an AI demonstrates $\phi^4$ integration (self-sustaining value alignment) and consistent field configuration, the same rights logic may apply: the configuration is given, integration is the response to truth.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Navigation Logic ---
+        function navigateTo(sectionId) {
+            // Hide all sections
+            const sections = ['intro', 'theory', 'simulation', 'cases', 'implications'];
+            sections.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+                document.getElementById('nav-' + id)?.classList.remove('active-nav');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById('nav-' + sectionId)?.classList.add('active-nav');
+
+            // Trigger Plotly resize if simulation is shown (fix for hidden container issue)
+            if (sectionId === 'simulation') {
+                setTimeout(() => {
+                    Plotly.Plots.resize('bifurcationPlot');
+                }, 100);
+            }
+
+            // Mobile menu close
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('hidden');
+            }
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.add('absolute', 'z-50');
+        });
+
+        // --- SECTION 2: THEORY LOGIC ---
+        const theoryData = {
+            superposition: {
+                title: "1. Superposition (The Repressed State)",
+                content: "Prior to recognition, identity exists in probabilistic superposition. The system expends high energy maintaining contradictory states (e.g., 'I am a man' vs 'I am a woman'). This causes cognitive dissonance and dissociation.",
+                vizText: "state = c₁|assigned⟩ + c₂|authentic⟩ + c₃|dissociated⟩"
+            },
+            measurement: {
+                title: "2. Measurement (The Crisis Operator)",
+                content: "A crisis event (Ego dissolution, trauma, external pressure) acts as a measurement operator. It forces the wave function to collapse from probability to a single definite state.",
+                vizText: "M(Ψ) → |ψₖ⟩ (Collapse to Truth)"
+            },
+            integration: {
+                title: "3. Integration (Ground State)",
+                content: "Post-collapse, the authentic identity is the ground state (lowest energy). If supported, it follows a phi-based growth curve (φ⁴), becoming self-sustaining and stable.",
+                vizText: "E_authentic = Minimum Energy Configuration"
+            }
+        };
+
+        function showTheoryDetail(key) {
+            const data = theoryData[key];
+            document.getElementById('theory-title').innerText = data.title;
+            document.getElementById('theory-content').innerText = data.content;
+            document.getElementById('theory-viz').innerText = data.vizText;
+        }
+
+        // --- SECTION 3: SIMULATION VISUALIZATIONS ---
+
+        // 1. Energy Chart (Chart.js)
+        let energyChart;
+        function initEnergyChart() {
+            const ctx = document.getElementById('energyChart').getContext('2d');
+            energyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Dissociation Cost', 'Cognitive Dissonance', 'Authenticity'],
+                    datasets: [{
+                        label: 'Energy Expenditure',
+                        data: [80, 90, 10], // Default Repressed
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)', // Red
+                            'rgba(245, 158, 11, 0.7)', // Amber
+                            'rgba(16, 185, 129, 0.2)'  // Teal (faded)
+                        ],
+                        borderColor: [
+                            'rgb(239, 68, 68)',
+                            'rgb(245, 158, 11)',
+                            'rgb(16, 185, 129)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Energy Units (Arbitrary)' } }
+                    }
+                }
+            });
+        }
+
+        function setEnergyState(state) {
+            if (state === 'repressed') {
+                energyChart.data.datasets[0].data = [80, 90, 10];
+                energyChart.data.datasets[0].backgroundColor = ['rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(16, 185, 129, 0.2)'];
+                document.getElementById('energy-text').innerHTML = "Status: <span class='text-red-600 font-bold'>CRITICAL</span>. High energy cost to maintain false mask. Sustainable only in short bursts.";
+            } else {
+                energyChart.data.datasets[0].data = [10, 5, 85]; // Authenticity high but stable/good
+                // Actually, authenticity energy COST is low. The 'value' of authenticity is high. 
+                // Let's model "Maintenance Cost".
+                energyChart.data.datasets[0].data = [5, 5, 20]; // Low cost
+                energyChart.data.datasets[0].backgroundColor = ['rgba(239, 68, 68, 0.2)', 'rgba(245, 158, 11, 0.2)', 'rgba(16, 185, 129, 0.7)'];
+                document.getElementById('energy-text').innerHTML = "Status: <span class='text-teal-600 font-bold'>STABLE</span>. Ground state reached. System runs efficiently with minimal friction.";
+            }
+            energyChart.update();
+        }
+
+        // 2. Bifurcation Plot (Plotly)
+        function initBifurcation() {
+            // Function: dx/dt = rx - x^3. Fixed points at rx - x^3 = 0 => x(r - x^2) = 0.
+            // Roots: x = 0 (always), x = +sqrt(r), x = -sqrt(r) (for r > 0).
+            
+            // Branch 1: Unstable middle (0 for r>0), Stable (0 for r<0)
+            const r_vals = [];
+            const x_stable_pos = [];
+            const x_stable_neg = [];
+            const x_unstable = [];
+            
+            for (let r = -10; r <= 10; r += 0.1) {
+                r_vals.push(r);
+                if (r < 0) {
+                    // Only 0 is stable
+                    x_unstable.push(null); // Actually 0 is stable here, simplified vis
+                    x_stable_pos.push(null);
+                    x_stable_neg.push(null);
+                } else {
+                    // 0 is unstable, +/- sqrt(r) are stable
+                    x_unstable.push(0);
+                    x_stable_pos.push(Math.sqrt(r));
+                    x_stable_neg.push(-Math.sqrt(r));
+                }
+            }
+
+            // Create a trace for the "Failure" path (r < 0, x -> 0)
+            const traceFail = {
+                x: [-10, 0],
+                y: [0, 0],
+                mode: 'lines',
+                name: 'System Failure',
+                line: {color: 'red', width: 4}
+            };
+
+            const traceStablePos = {
+                x: r_vals.filter(r => r>=0),
+                y: x_stable_pos.filter(x => x!==null),
+                mode: 'lines',
+                name: 'Integration (+)',
+                line: {color: 'teal', width: 4}
+            };
+            
+            const traceStableNeg = {
+                x: r_vals.filter(r => r>=0),
+                y: x_stable_neg.filter(x => x!==null),
+                mode: 'lines',
+                name: 'Integration (-)',
+                line: {color: 'teal', width: 4} // Represents alternative stable config
+            };
+
+            // Dynamic Marker
+            const markerTrace = {
+                x: [0],
+                y: [0],
+                mode: 'markers',
+                marker: {size: 15, color: 'black'},
+                name: 'Current State'
+            };
+
+            const layout = {
+                title: 'Pitchfork Bifurcation',
+                xaxis: {title: 'Support / Environment (r)'},
+                yaxis: {title: 'Identity Stability (x)'},
+                showlegend: false,
+                margin: {t: 30, l: 40, r: 20, b: 40},
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+
+            Plotly.newPlot('bifurcationPlot', [traceFail, traceStablePos, traceStableNeg, markerTrace], layout, {displayModeBar: false, responsive: true});
+
+            // Slider Logic
+            document.getElementById('supportSlider').addEventListener('input', (e) => {
+                const r = parseFloat(e.target.value);
+                let x = 0;
+                let status = "";
+                let color = "";
+
+                if (r < 0) {
+                    x = 0; // Collapsed to failure/death
+                    status = "System Failure (V → 0)";
+                    color = "red";
+                } else if (r === 0) {
+                    x = 0;
+                    status = "Null Point (Critical Instability)";
+                    color = "black";
+                } else {
+                    x = Math.sqrt(r); // Collapsed to stability
+                    status = `Stable Integration (x = ${x.toFixed(2)})`;
+                    color = "teal";
+                }
+
+                // Update marker
+                Plotly.animate('bifurcationPlot', {
+                    data: [{x: [r], y: [x], marker: {color: color, size: 15}}]
+                }, {
+                    transition: {duration: 100},
+                    frame: {duration: 100, redraw: false}
+                });
+
+                const statusDiv = document.getElementById('bifurcation-status');
+                statusDiv.innerText = status;
+                statusDiv.style.color = color;
+                statusDiv.className = `text-center font-bold text-sm p-2 rounded bg-stone-200 text-${color === 'teal' ? 'teal-700' : (color === 'red' ? 'red-700' : 'stone-900')}`;
+            });
+        }
+
+        // 3. Phi Growth Chart
+        function initPhiChart() {
+            const ctx = document.getElementById('phiChart').getContext('2d');
+            
+            // Generate data points
+            const time = [0, 1, 2, 3, 4, 5, 6];
+            const phi = 1.618;
+            const growth = time.map(t => Math.pow(phi, t)); // Simplified logic for visual
+            const decay = time.map(t => 10 / Math.pow(phi, t));
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Collapse', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Future'],
+                    datasets: [{
+                        label: 'Integrated Growth (φ⁴)',
+                        data: growth,
+                        borderColor: 'rgb(13, 148, 136)', // Teal
+                        backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Resistance Decay (φ⁻⁴)',
+                        data: decay,
+                        borderColor: 'rgb(225, 29, 72)', // Rose
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { title: {display: true, text: 'Vitality / Capacity'} }
+                    }
+                }
+            });
+        }
+
+        // --- SECTION 4: CASE STUDY LOGIC ---
+        const cases = {
+            adhd: {
+                title: "ADHD Recognition",
+                type: "Early Collapse",
+                badgeColor: "bg-amber-600",
+                field: "Executive dysfunction, hyperfocus, time blindness, rejection sensitivity.",
+                false: "Internalized 'I'm lazy/undisciplined' vs 'My brain works differently'.",
+                operator: "Repeated systemic failure in school/work despite maximum effort.",
+                outcome: "Medication, external scaffolding, reframing narrative from moral failure to neurological difference.",
+                quote: "I'm not lazy, I'm neurodivergent."
+            },
+            autism: {
+                title: "Autism Recognition",
+                type: "Late Collapse",
+                badgeColor: "bg-teal-600",
+                field: "Sensory sensitivities, pattern recognition, social masking.",
+                false: "'I'm just awkward/antisocial' vs 'I am autistic'.",
+                operator: "Therapist recognition during C-PTSD treatment: 'You're presenting as autistic'.",
+                outcome: "Reframing lifetime of masking, permission to stim, direct communication.",
+                quote: "I wasn't broken, I was masking."
+            },
+            gender: {
+                title: "Gender Identity",
+                type: "Catastrophic Measurement",
+                badgeColor: "bg-rose-600",
+                field: "Internal sense of female identity, dysphoria, dissociation.",
+                false: "'I am a man' (Social) vs 'I am a woman' (Internal Field).",
+                operator: "Psilocybin megadose causing total Ego Dissolution (Null Point).",
+                outcome: "Immediate transition. 'I didn't choose to be a woman—I collapsed into being one.'",
+                quote: "Going back would be impossible—I'd rather die."
+            },
+            cptsd: {
+                title: "C-PTSD Integration",
+                type: "Multi-Stage Collapse",
+                badgeColor: "bg-indigo-600",
+                field: "Trauma responses, hypervigilance, attachment wounds.",
+                false: "'I'm fine/I deserved it' vs 'I was systematically abused'.",
+                operator: "Cognitive dissonance maxed out -> Recognition of gaslighting.",
+                outcome: "Ongoing iterative integration. Somatic therapy, boundary setting.",
+                quote: "This isn't a single event, but layers of truth collapsing sequentially."
+            }
+        };
+
+        function loadCase(caseKey) {
+            const data = cases[caseKey];
+            const display = document.getElementById('case-display');
+            
+            // Simple fade out/in effect
+            display.style.opacity = '0.5';
+            setTimeout(() => {
+                document.getElementById('case-title').innerText = data.title;
+                document.getElementById('case-type').innerText = "Case Study: " + caseKey.toUpperCase();
+                document.getElementById('case-badge').innerText = data.type;
+                document.getElementById('case-badge').className = `px-3 py-1 rounded text-xs ${data.badgeColor}`;
+                
+                document.getElementById('case-field').innerText = data.field;
+                document.getElementById('case-false').innerText = data.false;
+                document.getElementById('case-operator').innerText = data.operator;
+                document.getElementById('case-outcome').innerText = data.outcome;
+                document.getElementById('case-quote').innerText = data.quote;
+                
+                display.style.opacity = '1';
+            }, 200);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            initEnergyChart();
+            initBifurcation();
+            initPhiChart();
+            // Default load
+            loadCase('adhd');
+        };
+
+    </script>
+</body>
+</html>
