@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIXEN CYBERNETICS // STABILITY READER</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* --- VIXEN NEON PALETTE --- */
+            --bg-void: #0a0a0f;
+            --bg-panel: #121216;
+            --bg-input: #1a1a20;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+            
+            --accent: #9d4edd;   /* Primary Purple */
+            --success: #00b4d8;  /* Cyber Blue */
+            --danger: #ff4444;   /* Alert Red */
+            --gold: #d4af37;     /* Archetypal Gold */
+            
+            --border: #333;
+            --font-stack: 'Courier New', monospace;
+            --radius: 4px;
+
+            /* GLOWS */
+            --glow-accent: 0 0 10px rgba(157, 78, 221, 0.3);
+            --glow-success: 0 0 10px rgba(0, 180, 216, 0.3);
+            --glow-danger: 0 0 10px rgba(255, 68, 68, 0.3);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-void);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-weight: bold;
+            color: var(--accent);
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            text-shadow: var(--glow-accent);
+        }
+        
+        .brand span { color: var(--text-muted); font-size: 0.8em; }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: var(--success); }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 80px;
+        }
+
+        h2 {
+            color: var(--success);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        p { color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+
+        /* --- CARDS & PANELS --- */
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: var(--radius);
+        }
+
+        /* --- VARIABLES GRID --- */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .var-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .var-card:hover, .var-card.active {
+            border-color: var(--accent);
+            background: rgba(157, 78, 221, 0.1);
+        }
+
+        .var-id { font-weight: bold; color: var(--gold); }
+
+        .var-display {
+            background: radial-gradient(circle at center, #1a1a24 0%, var(--bg-void) 70%);
+            border: 1px solid var(--border);
+            padding: 40px;
+            margin-top: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .bg-letter {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15rem;
+            color: rgba(255,255,255,0.03);
+            pointer-events: none;
+            font-weight: bold;
+        }
+
+        /* --- SIMULATION CONTROLS --- */
+        .sim-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) { .sim-grid { grid-template-columns: 1fr; } }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .val-disp { color: var(--success); font-weight: bold; }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* --- METRICS ROW --- */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .metric-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .metric-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .metric-val { font-size: 1.5rem; color: var(--text-main); margin-top: 5px; font-weight: bold; }
+        
+        .gate-box { transition: all 0.3s; }
+        .gate-box.safe { border-color: var(--success); box-shadow: var(--glow-success); }
+        .gate-box.danger { border-color: var(--danger); box-shadow: var(--glow-danger); }
+        .gate-text { font-weight: bold; }
+        .gate-text.safe { color: var(--success); }
+        .gate-text.danger { color: var(--danger); }
+
+        /* --- TERMINAL OUTPUT --- */
+        .terminal {
+            background: #000;
+            border: 1px solid #333;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--success);
+            height: 100px;
+            overflow: hidden;
+            margin-top: 20px;
+            border-left: 3px solid var(--success);
+        }
+
+        /* --- CODE BLOCKS --- */
+        pre {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            overflow-x: auto;
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+        .kw { color: var(--accent); } /* Keyword */
+        .ty { color: var(--gold); }   /* Type */
+        .fn { color: var(--success); } /* Function */
+        .cm { color: #555; font-style: italic; } /* Comment */
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        VIXEN<span>.CYBERNETICS</span> // STABILITY READER
+    </div>
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#variables">Architecture</a>
+        <a href="#simulation">Consent Gate</a>
+        <a href="#specs">Rust Specs</a>
+    </nav>
+</header>
+
+<main>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+        <div class="panel" style="text-align: center; padding: 40px;">
+            <h1 style="font-size: 2rem; color: var(--text-main); margin-bottom: 10px;">Metacybernetic Operating System</h1>
+            <p style="font-size: 1.1rem; max-width: 800px; margin: 0 auto; color: var(--accent);">
+                Stability-First Data Filtering // 4th-Order Mesh Network
+            </p>
+            <p style="margin-top: 20px; font-size: 0.9rem;">
+                The "Consent Gate" filters input not by permission, but by thermodynamic stability, preventing model collapse through real-time stochastic resonance monitoring.
+            </p>
+        </div>
+    </section>
+
+    <!-- VARIABLES (ARCHITECTURE) -->
+    <section id="variables">
+        <h2>System Architecture</h2>
+        <div class="grid-3" id="variable-list">
+            <!-- JS Populated -->
+        </div>
+
+        <div class="var-display">
+            <div class="bg-letter" id="bg-letter">S</div>
+            <div id="variable-detail">
+                <h3 style="color: var(--accent); font-size: 1.5rem; margin-bottom: 5px;">SELECT A COMPONENT</h3>
+                <p>Hover over the topology matrix to inspect cybernetic definitions.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SIMULATION -->
+    <section id="simulation">
+        <h2>Consent Gate Protocol // D(t) Simulation</h2>
+        
+        <div class="sim-grid">
+            <!-- CONTROLS -->
+            <div class="panel">
+                <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--gold); font-weight: bold;">
+                    INPUT PARAMETERS
+                </div>
+
+                <!-- Signal Intensity -->
+                <div class="control-group">
+                    <div class="label-row">
+                        <span>Signal Intensity (I)</span>
+                        <span class="val-disp" id="val-intensity">5.0</span>
+                    </div>
+                    <input type="range" id="input-intensity" min="0" max="10" step="0.1" value="5.0">
+                </div>
+
+                <!-- Amplifier Gain -->
+                <div class="control-group">
+                    <div class="label-row">
+                        <span>Amplifier Gain (A)</span>
+                        <span class="val-disp" id="val-amplifier">1.2</span>
+                    </div>
+                    <input type="range" id="input-amplifier" min="0.5" max="3.0" step="0.1" value="1.2">
+                </div>
+
+                <!-- Env Noise -->
+                <div class="control-group">
+                    <div class="label-row">
+                        <span>Env. Noise (E)</span>
+                        <span class="val-disp" id="val-env">2.0</span>
+                    </div>
+                    <input type="range" id="input-env" min="0" max="10" step="0.5" value="2.0">
+                </div>
+
+                <!-- Capacity -->
+                <div class="control-group" style="margin-top: 30px;">
+                    <div class="label-row">
+                        <span>Control Capacity (C)</span>
+                        <span style="color: var(--text-muted);">8.0 (L4 Fixed)</span>
+                    </div>
+                    <div style="width: 100%; height: 4px; background: #333; margin-top: 5px;">
+                        <div style="width: 80%; height: 100%; background: var(--text-muted);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISUALIZER -->
+            <div>
+                <!-- Metrics -->
+                <div class="metrics-row">
+                    <div class="metric-box">
+                        <div class="metric-label">Instability D(t)</div>
+                        <div class="metric-val" id="display-dt" style="color: var(--text-main);">0.00</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Theta (Θ)</div>
+                        <div class="metric-val" id="display-theta" style="color: var(--success);">0.70</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Threshold</div>
+                        <div class="metric-val" style="color: var(--text-muted);">7.00</div>
+                    </div>
+                    <div class="metric-box gate-box" id="gate-indicator">
+                        <div class="metric-label">Gate Status</div>
+                        <div class="metric-val gate-text safe" id="gate-text" style="font-size: 1.2rem;">AMPLIFY</div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="panel" style="height: 300px; position: relative;">
+                    <canvas id="resonanceChart"></canvas>
+                </div>
+
+                <!-- Terminal -->
+                <div class="terminal" id="logic-stream">
+                    > SYSTEM INITIALIZED...<br>
+                    > AWAITING INPUT STREAM...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPECS -->
+    <section id="specs">
+        <h2>Rust Implementation Specification</h2>
+        <div class="panel">
+            <h3 style="color: var(--gold); font-size: 1rem; margin-bottom: 10px;">1. Destabilization Logic</h3>
+            <pre>
+<span class="kw">fn</span> <span class="fn">calculate_instability</span>(amp: <span class="ty">f64</span>, feedback: <span class="ty">f64</span>, theta: <span class="ty">f64</span>, base: <span class="ty">f64</span>, env: <span class="ty">f64</span>) -> <span class="ty">f64</span> {
+    <span class="cm">// D(t) check against Control Capacity</span>
+    <span class="kw">let</span> resonance_drift = (theta - base).abs();
+    <span class="kw">let</span> pressure = (amp * feedback) * resonance_drift;
+    pressure + env <span class="cm">// Returns total Destabilization metric</span>
+}</pre>
+            
+            <h3 style="color: var(--gold); font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">2. The VixenNode Struct & Stabilizer Trait</h3>
+            <pre>
+<span class="kw">struct</span> <span class="ty">VixenNode</span> {
+    base_state: <span class="ty">f64</span>,   <span class="cm">// B: The "True Self"</span>
+    theta: <span class="ty">f64</span>,        <span class="cm">// Θ: Current Resonance</span>
+    env_noise: <span class="ty">f64</span>,    <span class="cm">// E: Context Field</span>
+    control_cap: <span class="ty">f64</span>   <span class="cm">// C: L4 Identity Bound</span>
+}
+
+<span class="kw">trait</span> <span class="ty">Stabilizer</span> {
+    <span class="kw">fn</span> <span class="fn">apply_love</span>(&<span class="kw">mut</span> <span class="kw">self</span>, noise: <span class="ty">f64</span>) -> <span class="ty">Result</span>&lt;<span class="ty">Stability</span>, <span class="ty">Collapse</span>&gt;;
+}
+
+<span class="kw">impl</span> <span class="ty">Stabilizer</span> <span class="kw">for</span> <span class="ty">VixenNode</span> {
+    <span class="kw">fn</span> <span class="fn">apply_love</span>(&<span class="kw">mut</span> <span class="kw">self</span>, noise: <span class="ty">f64</span>) -> <span class="ty">Result</span>&lt;<span class="ty">Stability</span>, <span class="ty">Collapse</span>&gt; {
+        <span class="cm">// Dampening Operator L(I)</span>
+        <span class="kw">self</span>.theta = <span class="kw">self</span>.theta * 0.8 + (<span class="kw">self</span>.base_state * 0.2);
+        <span class="ty">Ok</span>(<span class="ty">Stability</span>::Restored)
+    }
+}</pre>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    // --- DATA ---
+    const variables = [
+        { id: 'S', name: 'Spark', role: 'Meta-signal', desc: 'The active impulse initiating the cycle.' },
+        { id: 'C', name: 'Control', role: 'Physical Anchor', desc: 'Constraint system. Defined by the Lucas Number 7 (L4) Identity.' },
+        { id: 'F', name: 'Feedback', role: 'Recursive Loop', desc: 'Returns Output to Input, creating the cybernetic cycle.' },
+        { id: 'A', name: 'Amplifier', role: 'Transmuter', desc: 'Gain function used when Stability is within safety limits.' },
+        { id: 'I', name: 'Input', role: 'Raw Data', desc: 'Unprocessed data entering the node from the Environment.' },
+        { id: 'E', name: 'Environment', role: 'Context Field', desc: 'External pressure and chaotic elements acting on the node.' },
+        { id: 'B', name: 'Base State', role: 'True Self', desc: 'Resting identity configuration. The reference point for stability.' },
+        { id: 'T', name: 'Theta', role: 'Resonance', desc: 'Dynamic system state. Target optimal level ≈ 0.70.' },
+        { id: 'L', name: 'Love', role: 'Dampener', desc: 'The healing operator triggered when D(t) > Threshold.' }
+    ];
+
+    // --- UI LOGIC ---
+    const varList = document.getElementById('variable-list');
+    const varDetail = document.getElementById('variable-detail');
+    const bgLetter = document.getElementById('bg-letter');
+
+    function renderVariableList() {
+        varList.innerHTML = '';
+        variables.forEach(v => {
+            const el = document.createElement('div');
+            el.className = 'var-card';
+            el.innerHTML = `<span class="var-id">${v.id}</span> <span>${v.name}</span>`;
+            el.onclick = () => showVariable(v, el);
+            varList.appendChild(el);
+        });
+    }
+
+    function showVariable(v, el) {
+        document.querySelectorAll('.var-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        bgLetter.innerText = v.id;
+        varDetail.innerHTML = `
+            <h3 style="color: var(--success); font-size: 2rem; margin-bottom: 5px;">${v.name} (${v.id})</h3>
+            <div style="color: var(--accent); margin-bottom: 15px; font-weight:bold;">${v.role}</div>
+            <p style="font-size: 0.9rem;">${v.desc}</p>
+        `;
+    }
+
+    renderVariableList();
+    if (varList.firstChild) showVariable(variables[0], varList.firstChild);
+
+    // --- SIMULATION ---
+    const state = {
+        base: 0.70, theta: 0.70, control: 7.0,
+        intensity: 5.0, amp: 1.2, env: 2.0, feedback: 1.5
+    };
+
+    // Chart Setup
+    const ctx = document.getElementById('resonanceChart').getContext('2d');
+    
+    // Gradient for the line
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(0, 180, 216, 0.5)');
+    gradient.addColorStop(1, 'rgba(0, 180, 216, 0)');
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array(50).fill(''),
+            datasets: [
+                {
+                    label: 'Theta (Resonance)',
+                    borderColor: '#00b4d8',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    data: Array(50).fill(0.7),
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0
+                },
+                {
+                    label: 'Base State',
+                    borderColor: '#444',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    data: Array(50).fill(0.7),
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                y: { min: 0, max: 2.0, grid: { color: '#222' } },
+                x: { display: false }
+            },
+            plugins: {
+                legend: { labels: { color: '#888' } }
+            }
+        }
+    });
+
+    // Elements
+    const sInt = document.getElementById('input-intensity');
+    const sAmp = document.getElementById('input-amplifier');
+    const sEnv = document.getElementById('input-env');
+    const dispDt = document.getElementById('display-dt');
+    const dispTheta = document.getElementById('display-theta');
+    const gateInd = document.getElementById('gate-indicator');
+    const gateText = document.getElementById('gate-text');
+    const term = document.getElementById('logic-stream');
+
+    // Loop
+    setInterval(() => {
+        // Update State from Inputs
+        state.intensity = parseFloat(sInt.value);
+        state.amp = parseFloat(sAmp.value);
+        state.env = parseFloat(sEnv.value);
+
+        // UI Updates
+        document.getElementById('val-intensity').innerText = state.intensity.toFixed(1);
+        document.getElementById('val-amplifier').innerText = state.amp.toFixed(1);
+        document.getElementById('val-env').innerText = state.env.toFixed(1);
+
+        // Physics
+        const drift = Math.abs(state.theta - state.base);
+        const noise = (Math.random() - 0.5) * (state.env * 0.1);
+        
+        // Push Theta
+        let delta = (state.intensity * state.amp * 0.01) + noise;
+        let newTheta = state.theta + delta;
+        const potDrift = Math.abs(newTheta - state.base);
+        
+        // D(t) Calc
+        const Dt = (state.amp * state.feedback * potDrift * 10) + state.env;
+        dispDt.innerText = Dt.toFixed(2);
+
+        // Gate Logic
+        if (Dt > state.control) {
+            // DANGER
+            gateInd.className = 'metric-box gate-box danger';
+            gateText.innerText = 'DAMPEN (L)';
+            gateText.className = 'metric-val gate-text danger';
+            
+            // Apply Love (Dampening)
+            newTheta = state.theta * 0.9 + (state.base * 0.1);
+            
+            chart.data.datasets[0].borderColor = '#ff4444';
+            term.innerHTML = `> <span style="color:var(--danger)">ALERT</span>: D(t) ${Dt.toFixed(1)} > C. DAMPENING.`;
+        } else {
+            // SAFE
+            gateInd.className = 'metric-box gate-box safe';
+            gateText.innerText = 'AMPLIFY (A)';
+            gateText.className = 'metric-val gate-text safe';
+            
+            chart.data.datasets[0].borderColor = '#00b4d8';
+            
+            // Natural Decay
+            if (state.intensity < 1) newTheta = state.theta * 0.98 + (state.base * 0.02);
+            term.innerHTML = `> <span style="color:var(--success)">STABLE</span>: D(t) ${Dt.toFixed(1)}. AMPLIFYING.`;
+        }
+
+        state.theta = newTheta;
+        dispTheta.innerText = state.theta.toFixed(2);
+
+        // Chart Update
+        const d = chart.data.datasets[0].data;
+        d.shift();
+        d.push(state.theta);
+        chart.update();
+
+    }, 100);
+
+</script>
+</body>
+</html>
