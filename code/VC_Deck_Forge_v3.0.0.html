@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VIXEN CYBERNETICS // DECK FORGE v3.0</title>
+    <style>
+        :root {
+            /* --- VIXEN NEON PALETTE (From Deck Builder v2.5) --- */
+            --bg-void: #0a0a0f;
+            --bg-panel: #121216;
+            --bg-input: #1a1a20;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+            
+            --accent: #9d4edd;   /* Primary Purple */
+            --success: #00b4d8;  /* Cyber Blue */
+            --danger: #ff4444;   /* Alert Red */
+            --gold: #d4af37;     /* Archetypal Gold */
+            
+            --border: #333;
+            --font-stack: 'Courier New', monospace;
+            --radius: 4px;
+
+            /* NEON GLOWS */
+            --glow-accent: 0 0 10px rgba(157, 78, 221, 0.3);
+            --glow-success: 0 0 10px rgba(0, 180, 216, 0.3);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-void);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 50px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-weight: bold;
+            color: var(--accent);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .brand span { color: var(--text-muted); font-size: 0.8em; }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 5px 15px;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: var(--glow-accent);
+        }
+
+        button.primary {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        button.success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        button.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* --- MAIN LAYOUT --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 250px 1fr 350px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 1000px) {
+            main {
+                grid-template-columns: 200px 1fr;
+            }
+            .right-panel {
+                position: absolute;
+                right: 0;
+                top: 50px;
+                bottom: 0;
+                background: var(--bg-panel);
+                transform: translateX(100%);
+                transition: transform 0.3s;
+                z-index: 10;
+                width: 300px;
+                border-left: 1px solid var(--accent);
+            }
+            .right-panel.active { transform: translateX(0); }
+        }
+
+        /* --- LEFT: CARD LIST --- */
+        .left-panel {
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            font-weight: bold;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .card-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-item:hover { background: rgba(255,255,255,0.05); }
+        .card-item.active { 
+            background: rgba(157, 78, 221, 0.1); 
+            border-left: 3px solid var(--accent);
+            color: var(--accent);
+        }
+
+        /* --- CENTER: VISUALIZER --- */
+        .center-panel {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-image: 
+                linear-gradient(rgba(157, 78, 221, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(157, 78, 221, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        canvas {
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            max-width: 90%;
+            max-height: 90%;
+            border: 1px solid #333;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        /* --- RIGHT: EDITOR --- */
+        .right-panel {
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .editor-section {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px;
+            font-family: var(--font-stack);
+            font-size: 0.9rem;
+            border-radius: var(--radius);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea { resize: vertical; min-height: 80px; }
+
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+
+        /* --- MODALS (Vault & Gallery) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-panel);
+            border: 1px solid var(--accent);
+            width: 800px;
+            max-width: 90vw;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-radius: var(--radius);
+        }
+
+        .modal-header {
+            padding: 15px;
+            background: rgba(157, 78, 221, 0.1);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Vault List */
+        .vault-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            border-radius: var(--radius);
+        }
+        
+        .vault-item:hover { border-color: var(--success); }
+
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 10px;
+            aspect-ratio: 2/3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gallery-card:hover {
+            border-color: var(--success);
+            transform: translateY(-5px);
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 200;
+        }
+
+        /* Colors for Card Preview */
+        .color-picker-row {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid #fff;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        VIXEN CYBERNETICS <span>// DECK FORGE v3.0</span>
+    </div>
+    <div class="toolbar">
+        <button onclick="openGallery()">Holo-Grid</button>
+        <button class="primary" onclick="openVault()">Vault</button>
+        <button class="success" onclick="exportDeck()">Export JSON</button>
+        <label style="margin:0;">
+            <button onclick="document.getElementById('file-import').click()">Import</button>
+            <input type="file" id="file-import" style="display:none" onchange="importDeck(this)">
+        </label>
+    </div>
+</header>
+
+<main>
+    <!-- LEFT: LIST -->
+    <div class="left-panel">
+        <div class="panel-header">
+            <span>DECK MANIFEST</span>
+            <button onclick="addNewCard()" style="padding: 2px 8px; font-size:1.2em;">+</button>
+        </div>
+        <div class="panel-header" style="background:var(--bg-input); padding:5px;">
+            <input type="text" id="search-bar" placeholder="Filter protocols..." onkeyup="renderCardList()">
+        </div>
+        <div class="card-list" id="card-list">
+            <!-- Cards go here -->
+        </div>
+        <div style="padding:10px; border-top:1px solid var(--border); font-size:0.8rem; color:var(--text-muted); text-align:center;">
+            <span id="card-count">0</span> Protocols Loaded
+        </div>
+    </div>
+
+    <!-- CENTER: VISUALIZER -->
+    <div class="center-panel">
+        <canvas id="cardCanvas" width="400" height="600"></canvas>
+        <div class="zoom-controls">
+            <button onclick="toggleMobileEditor()" class="mobile-only" style="display:none;">Edit</button>
+        </div>
+    </div>
+
+    <!-- RIGHT: EDITOR -->
+    <div class="right-panel" id="right-panel">
+        
+        <!-- Tab Switcher -->
+        <div style="display:flex; border-bottom:1px solid var(--border);">
+            <button onclick="switchTab('card')" id="tab-card" class="col primary" style="border:none; border-bottom:2px solid var(--accent); border-radius:0;">Card Data</button>
+            <button onclick="switchTab('deck')" id="tab-deck" class="col" style="border:none; border-radius:0; background:transparent; color:var(--text-muted);">Deck Settings</button>
+        </div>
+
+        <!-- TAB: CARD EDIT -->
+        <div id="view-card" class="editor-section">
+            <div class="form-group">
+                <label>Protocol ID / Value</label>
+                <div class="row">
+                    <input type="text" id="inp-id" class="col" placeholder="e.g. 0, I, K" oninput="updateCurrentCard('id')">
+                    <input type="text" id="inp-suit" class="col" placeholder="Suit/Tag" oninput="updateCurrentCard('suit')">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="inp-name" placeholder="Card Name" oninput="updateCurrentCard('name')">
+            </div>
+
+            <div class="form-group">
+                <label>Archetype / Type</label>
+                <input type="text" id="inp-type" placeholder="e.g. Major Arcana, Unit, Event" oninput="updateCurrentCard('type')">
+            </div>
+
+            <div class="form-group">
+                <label>Description (Markdown)</label>
+                <textarea id="inp-desc" oninput="updateCurrentCard('desc')"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Quote / Flavor Text</label>
+                <textarea id="inp-quote" style="min-height:50px; font-style:italic;" oninput="updateCurrentCard('quote')"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Visual Hash (Color Seed)</label>
+                <input type="color" id="inp-color" value="#9d4edd" oninput="updateCurrentCard('color')">
+            </div>
+            
+             <button class="danger" style="width:100%; margin-top:20px;" onclick="deleteCurrentCard()">Delete Protocol</button>
+        </div>
+
+        <!-- TAB: DECK SETTINGS -->
+        <div id="view-deck" class="editor-section" style="display:none;">
+            <div class="form-group">
+                <label>Deck Name</label>
+                <input type="text" id="deck-name" value="Untitled Deck" oninput="updateDeckConfig()">
+            </div>
+            
+            <div class="form-group">
+                <label>Primary Colors (Gradient)</label>
+                <div class="row">
+                    <input type="color" id="deck-col-1" value="#0a0a0f" oninput="updateDeckConfig()">
+                    <input type="color" id="deck-col-2" value="#9d4edd" oninput="updateDeckConfig()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Card Back Style</label>
+                <select id="deck-back" onchange="updateDeckConfig()">
+                    <option value="minimal">Minimal Void</option>
+                    <option value="circuit">Circuit Board</option>
+                    <option value="eye">The Eye</option>
+                </select>
+            </div>
+
+             <div class="form-group">
+                <label>Hierarchy Definitions (JSON)</label>
+                <textarea id="deck-hierarchy" style="font-family:monospace; font-size:0.7rem; height:150px;" onchange="updateDeckConfig()">
+{
+  "ranks": ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"],
+  "suits": ["Spades", "Hearts", "Clubs", "Diamonds"]
+}
+                </textarea>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- VAULT MODAL -->
+<div id="modal-vault" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">THE VAULT (Local Storage)</span>
+            <button onclick="closeModals()">Close</button>
+        </div>
+        <div class="modal-body">
+            <div style="margin-bottom:20px; display:flex; gap:10px;">
+                <input type="text" id="save-name" placeholder="Save as..." style="flex:1;">
+                <button class="success" onclick="saveToVault()">Save Current Deck</button>
+            </div>
+            <div id="vault-list">
+                <!-- Vault items -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GALLERY MODAL -->
+<div id="modal-gallery" class="modal-overlay">
+    <div class="modal" style="width: 1000px;">
+        <div class="modal-header">
+            <span class="modal-title">HOLO-GRID VIEW</span>
+            <button onclick="closeModals()">Close</button>
+        </div>
+        <div class="modal-body">
+            <div class="gallery-grid" id="gallery-grid">
+                <!-- Grid items -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast">Operation Complete</div>
+
+<script>
+    // --- VIXEN DECK FORGE CORE ---
+    
+    // STATE
+    let CARDS = [
+        { id: "0", name: "The Fool", suit: "Major", type: "Arcana", desc: "The beginning of the journey.", quote: "Leap before you look.", color: "#9d4edd" }
+    ];
+    let CONFIG = {
+        name: "Untitled Deck",
+        colors: ["#0a0a0f", "#9d4edd"],
+        backStyle: "minimal",
+        hierarchy: {
+             ranks: ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"],
+             suits: ["Spades", "Hearts", "Clubs", "Diamonds"]
+        }
+    };
+    let activeCardIndex = 0;
+
+    // INIT
+    window.onload = () => {
+        renderCardList();
+        renderCanvas();
+        loadDeckConfigToUI();
+        
+        // Load default if empty
+        if(localStorage.getItem('vixen_last_deck')) {
+            try {
+                const data = JSON.parse(localStorage.getItem('vixen_last_deck'));
+                CARDS = data.cards;
+                CONFIG = data.config;
+                renderCardList();
+                loadDeckConfigToUI();
+            } catch(e) { console.error("Auto-load failed", e); }
+        }
+        
+        // Resize canvas listener
+        window.addEventListener('resize', renderCanvas);
+    };
+
+    // --- UI RENDERERS ---
+
+    function renderCardList() {
+        const list = document.getElementById('card-list');
+        const search = document.getElementById('search-bar').value.toLowerCase();
+        list.innerHTML = '';
+        
+        CARDS.forEach((card, idx) => {
+            if (card.name.toLowerCase().includes(search) || card.type.toLowerCase().includes(search)) {
+                const el = document.createElement('div');
+                el.className = `card-item ${idx === activeCardIndex ? 'active' : ''}`;
+                el.innerHTML = `
+                    <span>${card.name || 'Untitled'}</span>
+                    <span style="color:var(--text-muted); font-size:0.8em;">${card.id || '#'}</span>
+                `;
+                el.onclick = () => selectCard(idx);
+                list.appendChild(el);
+            }
+        });
+        
+        document.getElementById('card-count').innerText = CARDS.length;
+        populateEditor();
+    }
+
+    function selectCard(idx) {
+        activeCardIndex = idx;
+        renderCardList(); // To update active class
+        populateEditor();
+        renderCanvas();
+    }
+
+    function populateEditor() {
+        if (CARDS.length === 0) return;
+        const card = CARDS[activeCardIndex];
+        document.getElementById('inp-id').value = card.id || '';
+        document.getElementById('inp-suit').value = card.suit || '';
+        document.getElementById('inp-name').value = card.name || '';
+        document.getElementById('inp-type').value = card.type || '';
+        document.getElementById('inp-desc').value = card.desc || '';
+        document.getElementById('inp-quote').value = card.quote || '';
+        document.getElementById('inp-color').value = card.color || '#9d4edd';
+    }
+
+    function loadDeckConfigToUI() {
+        document.getElementById('deck-name').value = CONFIG.name;
+        document.getElementById('deck-col-1').value = CONFIG.colors[0];
+        document.getElementById('deck-col-2').value = CONFIG.colors[1];
+        document.getElementById('deck-back').value = CONFIG.backStyle;
+        document.getElementById('deck-hierarchy').value = JSON.stringify(CONFIG.hierarchy, null, 2);
+    }
+
+    // --- UPDATERS ---
+
+    function updateCurrentCard(field) {
+        if (CARDS.length === 0) return;
+        const val = document.getElementById(`inp-${field}`).value;
+        CARDS[activeCardIndex][field] = val;
+        
+        if (field === 'name' || field === 'id') renderCardList(); // Re-render list if name changes
+        renderCanvas();
+        autoSave();
+    }
+
+    function updateDeckConfig() {
+        CONFIG.name = document.getElementById('deck-name').value;
+        CONFIG.colors[0] = document.getElementById('deck-col-1').value;
+        CONFIG.colors[1] = document.getElementById('deck-col-2').value;
+        CONFIG.backStyle = document.getElementById('deck-back').value;
+        try {
+            CONFIG.hierarchy = JSON.parse(document.getElementById('deck-hierarchy').value);
+        } catch(e) {}
+        renderCanvas();
+        autoSave();
+    }
+
+    function addNewCard() {
+        CARDS.push({
+            id: (CARDS.length + 1).toString(),
+            name: "New Protocol",
+            suit: "Node",
+            type: "Unit",
+            desc: "Description awaiting input...",
+            quote: "...",
+            color: "#00b4d8"
+        });
+        activeCardIndex = CARDS.length - 1;
+        renderCardList();
+        renderCanvas();
+        autoSave();
+    }
+    
+    function deleteCurrentCard() {
+        if(confirm("Delete this protocol?")) {
+            CARDS.splice(activeCardIndex, 1);
+            if(activeCardIndex >= CARDS.length) activeCardIndex = CARDS.length - 1;
+            if(activeCardIndex < 0) addNewCard(); // Always keep one
+            renderCardList();
+            renderCanvas();
+            autoSave();
+        }
+    }
+
+    function switchTab(tab) {
+        document.getElementById('view-card').style.display = tab === 'card' ? 'block' : 'none';
+        document.getElementById('view-deck').style.display = tab === 'deck' ? 'block' : 'none';
+        
+        document.getElementById('tab-card').classList.toggle('primary', tab === 'card');
+        document.getElementById('tab-deck').classList.toggle('primary', tab === 'deck');
+        
+        document.getElementById('tab-card').style.color = tab === 'card' ? 'var(--accent)' : 'var(--text-muted)';
+        document.getElementById('tab-deck').style.color = tab === 'deck' ? 'var(--accent)' : 'var(--text-muted)';
+        
+        document.getElementById('tab-card').style.borderBottom = tab === 'card' ? '2px solid var(--accent)' : 'none';
+        document.getElementById('tab-deck').style.borderBottom = tab === 'deck' ? '2px solid var(--accent)' : 'none';
+    }
+
+    function autoSave() {
+        const data = { config: CONFIG, cards: CARDS };
+        localStorage.setItem('vixen_last_deck', JSON.stringify(data));
+    }
+
+    // --- CANVAS ENGINE (NEON FORGE) ---
+
+    function renderCanvas() {
+        const canvas = document.getElementById('cardCanvas');
+        const ctx = canvas.getContext('2d');
+        const card = CARDS[activeCardIndex] || {};
+        
+        // Clear
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Background Gradient (Deck Settings)
+        const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        grad.addColorStop(0, CONFIG.colors[0]);
+        grad.addColorStop(1, CONFIG.colors[1]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+        
+        // Card Border
+        ctx.strokeStyle = card.color || CONFIG.colors[1];
+        ctx.lineWidth = 4;
+        ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+        
+        // Inner Glow
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = card.color || CONFIG.colors[1];
+        ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+        ctx.shadowBlur = 0;
+
+        // Text Styles
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "center";
+        
+        // ID (Top Corners)
+        ctx.font = "bold 24px Courier New";
+        ctx.fillText(card.id || "", 60, 70);
+        ctx.fillText(card.id || "", canvas.width - 60, canvas.height - 50);
+
+        // Name (Center)
+        ctx.font = "bold 28px Courier New";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#000";
+        ctx.fillText(card.name || "", canvas.width / 2, canvas.height / 2 - 40);
+        ctx.shadowBlur = 0;
+
+        // Suit/Type
+        ctx.font = "16px Courier New";
+        ctx.fillStyle = "#ccc";
+        ctx.fillText(`${card.suit || ''} // ${card.type || ''}`, canvas.width / 2, canvas.height / 2 - 10);
+        
+        // Divider
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(80, canvas.height / 2 + 10);
+        ctx.lineTo(canvas.width - 80, canvas.height / 2 + 10);
+        ctx.stroke();
+
+        // Description (Wrapped)
+        ctx.font = "14px Courier New";
+        ctx.fillStyle = "#e0e0e0";
+        wrapText(ctx, card.desc || "", canvas.width / 2, canvas.height / 2 + 40, canvas.width - 120, 20);
+
+        // Quote
+        if (card.quote) {
+            ctx.font = "italic 12px Courier New";
+            ctx.fillStyle = CONFIG.colors[1]; // Accent color for quote
+            ctx.fillText(`"${card.quote}"`, canvas.width / 2, canvas.height - 80);
+        }
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        for(let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = ctx.measureText(testLine);
+            const testWidth = metrics.width;
+            if (testWidth > maxWidth && n > 0) {
+                ctx.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line, x, y);
+    }
+
+    // --- VAULT & GALLERY ---
+
+    function openVault() {
+        document.getElementById('modal-vault').classList.add('active');
+        document.getElementById('save-name').value = CONFIG.name;
+        renderVaultList();
+    }
+
+    function closeModals() {
+        document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+    }
+
+    function getVault() {
+        return JSON.parse(localStorage.getItem('vixen_vault') || '[]');
+    }
+
+    function saveToVault() {
+        const name = document.getElementById('save-name').value || "Untitled";
+        const vault = getVault();
+        
+        // Check if exists
+        const existingIdx = vault.findIndex(d => d.name === name);
+        const entry = {
+            name: name,
+            timestamp: new Date().toISOString(),
+            data: { config: CONFIG, cards: CARDS }
+        };
+
+        if (existingIdx >= 0) {
+            if(!confirm(`Overwrite "${name}"?`)) return;
+            vault[existingIdx] = entry;
+        } else {
+            vault.push(entry);
+        }
+
+        localStorage.setItem('vixen_vault', JSON.stringify(vault));
+        showToast(`Saved "${name}"`);
+        renderVaultList();
+    }
+
+    function loadFromVault(idx) {
+        const vault = getVault();
+        if(vault[idx]) {
+            if(confirm("Load deck? Unsaved changes to current deck will be lost.")) {
+                const entry = vault[idx];
+                CONFIG = entry.data.config;
+                CARDS = entry.data.cards;
+                // Ensure name matches save name
+                CONFIG.name = entry.name;
+                
+                renderCardList();
+                loadDeckConfigToUI();
+                renderCanvas();
+                closeModals();
+                showToast(`Loaded "${entry.name}"`);
+            }
+        }
+    }
+
+    function deleteFromVault(idx) {
+        if(confirm("Permanently delete this deck?")) {
+            const vault = getVault();
+            vault.splice(idx, 1);
+            localStorage.setItem('vixen_vault', JSON.stringify(vault));
+            renderVaultList();
+        }
+    }
+
+    function renderVaultList() {
+        const list = document.getElementById('vault-list');
+        const vault = getVault();
+        list.innerHTML = '';
+        
+        if(vault.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Vault Empty</div>';
+            return;
+        }
+
+        vault.forEach((entry, idx) => {
+            const el = document.createElement('div');
+            el.className = 'vault-item';
+            el.innerHTML = `
+                <div>
+                    <div style="font-weight:bold; color:var(--accent);">${entry.name}</div>
+                    <div style="font-size:0.7em; color:var(--text-muted);">${new Date(entry.timestamp).toLocaleString()} • ${entry.data.cards.length} cards</div>
+                </div>
+                <div>
+                    <button class="primary" onclick="loadFromVault(${idx})">Load</button>
+                    <button class="danger" onclick="deleteFromVault(${idx})">×</button>
+                </div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    // --- GALLERY ---
+
+    function openGallery() {
+        document.getElementById('modal-gallery').classList.add('active');
+        const grid = document.getElementById('gallery-grid');
+        grid.innerHTML = '';
+        
+        CARDS.forEach((card, idx) => {
+            const el = document.createElement('div');
+            el.className = 'gallery-card';
+            el.style.borderTop = `3px solid ${card.color || CONFIG.colors[1]}`;
+            el.innerHTML = `
+                <div style="font-size:1.5em; font-weight:bold;">${card.id}</div>
+                <div style="margin:5px 0; color:var(--text-main);">${card.name}</div>
+                <div style="font-size:0.8em; color:var(--text-muted);">${card.suit}</div>
+            `;
+            el.onclick = () => {
+                selectCard(idx);
+                closeModals();
+            };
+            grid.appendChild(el);
+        });
+    }
+
+    // --- UTILS ---
+
+    function exportDeck() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config: CONFIG, cards: CARDS }, null, 2));
+        const dl = document.createElement('a');
+        dl.setAttribute("href", dataStr);
+        dl.setAttribute("download", `${CONFIG.name.replace(/\s+/g, '_')}_v3.json`);
+        document.body.appendChild(dl);
+        dl.click();
+        dl.remove();
+    }
+
+    function importDeck(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const d = JSON.parse(e.target.result);
+                if(d.config) CONFIG = d.config;
+                if(d.cards) CARDS = d.cards;
+                renderCardList();
+                loadDeckConfigToUI();
+                renderCanvas();
+                showToast("Deck Imported");
+            } catch(e) { alert("Invalid JSON"); }
+        };
+        reader.readAsText(file);
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.opacity = 1;
+        setTimeout(() => t.style.opacity = 0, 2000);
+    }
+
+    function toggleMobileEditor() {
+        const panel = document.getElementById('right-panel');
+        panel.classList.toggle('active');
+    }
+
+</script>
+</body>
+</html>
