@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT TIAMAT // Collapse Forecaster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- VIXEN PALETTE (Synthesized from Golden Acorn/Helix) --- */
+            --void: #050508;
+            --void-deep: #020204;
+            --panel-bg: #0f0f13;
+            --gold: #d4af37;
+            --gold-dim: #8a7020;
+            --gold-bright: #ffd700;
+            --text-main: #e8e0d5;
+            --text-muted: #888890;
+            
+            /* --- ARCHETYPE COLORS --- */
+            --ugallu-storm: #60a5fa; /* Electric Blue */
+            --uridimmu-blood: #ef4444; /* Red */
+            --basmu-toxic: #a3e635; /* Toxic Green */
+            --girtablullu-iron: #94a3b8; /* Iron Grey */
+            --phoenix-fire: #f59e0b; /* Orange/Gold */
+            --stable-blue: #22d3ee; /* Cyan */
+            
+            /* --- UI VARIABLES --- */
+            --radius: 8px;
+            --border: 1px solid rgba(212, 175, 55, 0.2);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            --font-header: 'Cinzel', serif;
+            --font-mono: 'Space Mono', monospace;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--void);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            height: 100vh;
+            overflow: hidden; /* App-like feel */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            background: var(--void-deep);
+            border-bottom: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+
+        .brand {
+            font-family: var(--font-header);
+            color: var(--gold);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .brand span { color: var(--text-muted); font-size: 0.8em; }
+
+        /* --- MAIN LAYOUT --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 350px 1fr 300px; /* Inputs | Visualizer | Log */
+            overflow: hidden;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1100px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                overflow-y: auto;
+            }
+        }
+
+        /* --- LEFT PANEL: TUNING FORKS (INPUTS) --- */
+        .panel-inputs {
+            background: var(--panel-bg);
+            border-right: var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            font-family: var(--font-header);
+            color: var(--gold);
+            border-bottom: 1px solid var(--gold-dim);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .slider-value { color: var(--gold); }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #2a2a30;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--gold-dim);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        .btn-analyze {
+            margin-top: auto;
+            padding: 15px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-family: var(--font-header);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn-analyze:hover {
+            background: var(--gold);
+            color: var(--void);
+            box-shadow: 0 0 20px var(--gold-dim);
+        }
+
+        /* --- CENTER PANEL: THE EYE (VISUALIZER) --- */
+        .panel-visualizer {
+            background: radial-gradient(circle at center, #1a1a24 0%, var(--void) 80%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 40px;
+        }
+
+        .card-slot {
+            width: 300px;
+            height: 480px;
+            border: 2px solid var(--gold-dim);
+            border-radius: 15px;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            transition: all 0.5s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .card-slot.active {
+            border-color: var(--active-color, var(--gold));
+            box-shadow: 0 0 50px var(--active-color, var(--gold));
+            transform: translateY(-10px);
+        }
+
+        .archetype-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--active-color, var(--text-muted));
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .archetype-title {
+            font-family: var(--font-header);
+            font-size: 1.8rem;
+            color: var(--active-color, var(--text-main));
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .archetype-desc {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .bias-warning {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid var(--uridimmu-blood);
+            color: var(--uridimmu-blood);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        /* --- RIGHT PANEL: THE CHRONICLE (LOG) --- */
+        .panel-log {
+            background: var(--panel-bg);
+            border-left: var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .log-header {
+            padding: 20px;
+            border-bottom: var(--border);
+            font-family: var(--font-header);
+            color: var(--gold);
+        }
+
+        .log-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .log-entry {
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--text-muted);
+            padding: 10px;
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .log-entry:hover { background: rgba(255,255,255,0.08); }
+
+        .log-entry.Ugallu { border-color: var(--ugallu-storm); }
+        .log-entry.Uridimmu { border-color: var(--uridimmu-blood); }
+        .log-entry.Basmu { border-color: var(--basmu-toxic); }
+        .log-entry.Girtablullu { border-color: var(--girtablullu-iron); }
+        .log-entry.VixenIntegration { border-color: var(--phoenix-fire); }
+        .log-entry.Stable { border-color: var(--stable-blue); }
+
+        .log-ts { color: var(--text-muted); margin-bottom: 4px; display: block; }
+        .log-res { font-weight: bold; color: var(--text-main); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--void-deep); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        VIXEN CYBERNETICS <span>// TIAMAT FORECASTER</span>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--gold);">
+        SYS.STATUS: ONLINE
+    </div>
+</header>
+
+<main>
+    <!-- LEFT: INPUTS -->
+    <section class="panel-inputs">
+        <div class="panel-header">System Vectors</div>
+        
+        <!-- 1. OBSERVER DETACHMENT (The Critical Gate) -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Observer Detachment (TI_D)</span>
+                <span id="val-observer" class="slider-value">0.50</span>
+            </div>
+            <input type="range" id="in-observer" min="0" max="1" step="0.01" value="0.50">
+            <div style="font-size: 0.7rem; color: #555;">Must be > 0.10 to Analyze</div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #222; margin: 10px 0;">
+
+        <!-- 2. ENERGY SUBSTRATE -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Energy Substrate (Spoons/Grid)</span>
+                <span id="val-energy" class="slider-value">0.60</span>
+            </div>
+            <input type="range" id="in-energy" min="0" max="1" step="0.01" value="0.60">
+        </div>
+
+        <!-- 3. WEALTH PUMP -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Wealth/Dopamine Extraction</span>
+                <span id="val-wealth" class="slider-value">0.40</span>
+            </div>
+            <input type="range" id="in-wealth" min="0" max="1" step="0.01" value="0.40">
+        </div>
+
+        <!-- 4. NARRATIVE COHERENCE -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Narrative Coherence (Story)</span>
+                <span id="val-narrative" class="slider-value">0.70</span>
+            </div>
+            <input type="range" id="in-narrative" min="0" max="1" step="0.01" value="0.70">
+        </div>
+
+        <!-- 5. MASS MOBILIZATION -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Mass Mobilization (Somatic)</span>
+                <span id="val-mass" class="slider-value">0.30</span>
+            </div>
+            <input type="range" id="in-mass" min="0" max="1" step="0.01" value="0.30">
+        </div>
+
+        <!-- 6. ELITE MOBILIZATION -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Elite Mobilization (Superego)</span>
+                <span id="val-elite" class="slider-value">0.20</span>
+            </div>
+            <input type="range" id="in-elite" min="0" max="1" step="0.01" value="0.20">
+        </div>
+
+        <button class="btn-analyze" id="btn-analyze">Divinate State</button>
+    </section>
+
+    <!-- CENTER: VISUALIZER -->
+    <section class="panel-visualizer">
+        <div id="bias-warning" class="bias-warning">
+            ⚠️ BIAS ERROR: OBSERVER ATTACHMENT DETECTED. UNABLE TO FORECAST.
+        </div>
+
+        <div class="card-slot" id="card-slot">
+            <div class="archetype-icon" id="card-icon">◇</div>
+            <div class="archetype-title" id="card-title">Awaiting Input</div>
+            <div class="archetype-desc" id="card-desc">
+                Adjust the system vectors and initiate the protocol to reveal the current metacybernetic attractor.
+            </div>
+        </div>
+    </section>
+
+    <!-- RIGHT: LOG -->
+    <section class="panel-log">
+        <div class="log-header">The Chronicle (BlackBox)</div>
+        <div class="log-list" id="log-list">
+            <!-- Entries go here -->
+        </div>
+        <div style="padding: 10px; border-top: var(--border);">
+            <button onclick="clearLog()" style="background:none; border:none; color: var(--text-muted); cursor: pointer; font-family: var(--font-mono); font-size: 0.7rem;">[CLEAR MEMORY]</button>
+        </div>
+    </section>
+</main>
+
+<script>
+    // --- VIXEN FOUNDRY: TIAMAT ENGINE (JS PORT) ---
+
+    const ARCHETYPES = {
+        Ugallu: {
+            id: 'Ugallu',
+            name: 'Ugallu // The Storm',
+            desc: 'Hard Crash. Physics failure. Panic, immediate resource scarcity. The system is collapsing under its own weight.',
+            color: 'var(--ugallu-storm)',
+            icon: '⚡'
+        },
+        Uridimmu: {
+            id: 'Uridimmu',
+            name: 'Uridimmu // The Mad Dog',
+            desc: 'Civil War. High extraction meets low narrative. The social contract has snapped. Kinetic violence likely.',
+            color: 'var(--uridimmu-blood)',
+            icon: '🐺'
+        },
+        Basmu: {
+            id: 'Basmu',
+            name: 'Bašmu // The Toxic Bloom',
+            desc: 'Viral Disinfo. Reality fracture. Narrative is dead, but mobilization is high. Energy flows into psychosis.',
+            color: 'var(--basmu-toxic)',
+            icon: '🐍'
+        },
+        Girtablullu: {
+            id: 'Girtablullu',
+            name: 'Girtablullu // The Gatekeeper',
+            desc: 'Totalitarian Lockdown. Elites are mobilized and hoarding. The gates are shutting.',
+            color: 'var(--girtablullu-iron)',
+            icon: '🛡️'
+        },
+        VixenIntegration: {
+            id: 'VixenIntegration',
+            name: 'The Phoenix',
+            desc: 'Vixen Integration. Successful transition through the fire. High lucidity and narrative alignment.',
+            color: 'var(--phoenix-fire)',
+            icon: '🔥'
+        },
+        Stable: {
+            id: 'Stable',
+            name: 'The Stone',
+            desc: 'Metastability. No critical collapse vectors detected. The system holds... for now.',
+            color: 'var(--stable-blue)',
+            icon: '💎'
+        }
+    };
+
+    // --- STATE MANAGEMENT ---
+    
+    function getInputs() {
+        return {
+            observer: parseFloat(document.getElementById('in-observer').value),
+            energy: parseFloat(document.getElementById('in-energy').value),
+            wealth: parseFloat(document.getElementById('in-wealth').value),
+            narrative: parseFloat(document.getElementById('in-narrative').value),
+            mass: parseFloat(document.getElementById('in-mass').value),
+            elite: parseFloat(document.getElementById('in-elite').value)
+        };
+    }
+
+    function calculateRisk(state) {
+        // GATE 1: TI_D (Observer Detachment)
+        if (state.observer < 0.1) {
+            return { error: "BIAS_LOCKOUT" };
+        }
+
+        // GATE 2: HARD CRASH (Physics)
+        if (state.energy < 0.2) return ARCHETYPES.Ugallu;
+
+        // GATE 3: REVOLUTION (Societal)
+        if (state.wealth > 0.9 && state.narrative < 0.3) return ARCHETYPES.Uridimmu;
+
+        // GATE 4: TOTALITARIAN (Gatekeeper)
+        if (state.elite > 0.8 && state.wealth > 0.7) return ARCHETYPES.Girtablullu;
+
+        // GATE 5: TOXIC BLOOM (Bašmu)
+        if (state.narrative < 0.2 && state.mass > 0.7) return ARCHETYPES.Basmu;
+
+        // GATE 6: THE PHOENIX
+        if (state.observer > 0.8 && state.narrative > 0.5 && state.energy > 0.4) return ARCHETYPES.VixenIntegration;
+
+        return ARCHETYPES.Stable;
+    }
+
+    // --- UI UPDATES ---
+
+    // Update slider number displays
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const display = document.getElementById(e.target.id.replace('in-', 'val-'));
+            if(display) display.textContent = parseFloat(e.target.value).toFixed(2);
+        });
+    });
+
+    // Analyze Button
+    document.getElementById('btn-analyze').addEventListener('click', () => {
+        const state = getInputs();
+        const result = calculateRisk(state);
+
+        const cardSlot = document.getElementById('card-slot');
+        const biasWarning = document.getElementById('bias-warning');
+
+        if (result.error) {
+            // Trigger Bias Warning
+            biasWarning.style.display = 'block';
+            cardSlot.style.opacity = '0.3';
+            return;
+        }
+
+        // Hide Warning
+        biasWarning.style.display = 'none';
+        cardSlot.style.opacity = '1';
+
+        // Render Card
+        renderCard(result);
+        
+        // Log to Chronicle
+        logEntry(result, state);
+    });
+
+    function renderCard(archetype) {
+        const slot = document.getElementById('card-slot');
+        const icon = document.getElementById('card-icon');
+        const title = document.getElementById('card-title');
+        const desc = document.getElementById('card-desc');
+
+        // Reset animation
+        slot.classList.remove('active');
+        void slot.offsetWidth; // trigger reflow
+
+        // Update content
+        slot.style.setProperty('--active-color', archetype.color);
+        icon.textContent = archetype.icon;
+        title.textContent = archetype.name;
+        desc.textContent = archetype.desc;
+
+        // Trigger animation
+        slot.classList.add('active');
+    }
+
+    function logEntry(archetype, state) {
+        const list = document.getElementById('log-list');
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${archetype.id}`;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        
+        entry.innerHTML = `
+            <span class="log-ts">[${timestamp}] TI_D:${state.observer.toFixed(2)}</span>
+            <span class="log-res">${archetype.name}</span>
+        `;
+        
+        // Click to restore state (Feature for later)
+        entry.onclick = () => {
+            console.log("Restoring state:", state);
+            // We could restore sliders here if we wanted
+        };
+
+        list.prepend(entry);
+    }
+
+    function clearLog() {
+        document.getElementById('log-list').innerHTML = '';
+    }
+
+</script>
+
+</body>
+</html>
